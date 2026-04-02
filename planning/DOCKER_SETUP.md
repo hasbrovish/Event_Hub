@@ -1,5 +1,7 @@
 # Docker + Postgres for Event Hub
 
+**No Docker allowed (e.g. corporate laptop)?** Use **[LOCAL_POSTGRES_SETUP.md](./LOCAL_POSTGRES_SETUP.md)** — install Postgres locally or use IT-provided DB, then `scripts/init_local_db.sql` + `backend/.env`.
+
 ## What you get
 
 - **PostgreSQL 16** in a container named **`eventhub-pg`**.

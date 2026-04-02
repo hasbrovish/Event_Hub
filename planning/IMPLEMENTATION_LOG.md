@@ -99,6 +99,7 @@ Aligned with `CONTEXT.md`, `MASTER_IMPLEMENTATION_PLAN.md`, `reference_docs/db_d
 ## 4. How to run (reviewer checklist)
 
 1. **Docker + persistence:** see `planning/DOCKER_SETUP.md`. Data lives in volume `eventhub_pg_data` until `docker compose down -v`.
+1b. **No Docker (corporate laptop):** see `planning/LOCAL_POSTGRES_SETUP.md` — local Postgres + `scripts/init_local_db.sql` + `backend/.env`.
 2. **DB only:** `./scripts/docker-up.sh` (requires Docker daemon running).
 3. **Full stack (DB + migrate + API + UI):** `./scripts/run-all.sh` from repo root (starts missing pieces; skips ports already in use).
 4. **One-shot API + DB:** `./scripts/run-backend.sh` — `docker compose up -d postgres`, waits via `docker compose exec … pg_isready`, venv, `alembic upgrade`, uvicorn on **8000**.
@@ -134,6 +135,11 @@ Aligned with `CONTEXT.md`, `MASTER_IMPLEMENTATION_PLAN.md`, `reference_docs/db_d
 
 - Frontend: `/approvals` **Pending approvals** page (`useApprovals`), sidebar links for organizer + admin roles.
 - `Manage Events` tabs remain mock data; real review queue is `/approvals` until that page is consolidated.
+
+### 2026-04-02 (local Postgres without Docker)
+
+- `planning/LOCAL_POSTGRES_SETUP.md` for corporate laptops without Docker Desktop.
+- `scripts/init_local_db.sql` to create `eventhub` role/DB; cross-links from `DOCKER_SETUP.md`, `.env.example`, run scripts.
 
 ### 2026-04-02 (offline Swagger /docs)
 

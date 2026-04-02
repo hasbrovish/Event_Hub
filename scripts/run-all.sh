@@ -9,7 +9,7 @@ echo "=== Event Hub: full stack ==="
 if command -v docker >/dev/null 2>&1 && docker info >/dev/null 2>&1; then
   "$ROOT/scripts/docker-up.sh" || echo "⚠ docker-up.sh failed — fix Docker/logs, then run it again."
 else
-  echo "⚠ Docker daemon not available — start Docker Desktop, then: ./scripts/docker-up.sh"
+  echo "⚠ Docker not available — use Docker + ./scripts/docker-up.sh OR local Postgres: planning/LOCAL_POSTGRES_SETUP.md"
   echo "  API will still start but /health may show db unreachable until Postgres runs."
 fi
 
@@ -25,7 +25,7 @@ fi
 if .venv/bin/alembic upgrade head 2>/dev/null; then
   echo "✓ Database migrations applied"
 else
-  echo "⚠ Skipped migrations (Postgres not reachable). After Docker is up: cd backend && .venv/bin/alembic upgrade head"
+  echo "⚠ Skipped migrations (Postgres not reachable). After DB is up: cd backend && .venv/bin/alembic upgrade head (see planning/LOCAL_POSTGRES_SETUP.md)"
 fi
 
 api_up() { lsof -iTCP:8000 -sTCP:LISTEN >/dev/null 2>&1; }
@@ -57,4 +57,4 @@ fi
 echo ""
 echo "Open:  http://127.0.0.1:8080"
 echo "API:   http://127.0.0.1:8000/docs"
-echo "Until /health shows db connected, run Docker and: ./scripts/docker-up.sh"
+echo "Until /health shows db connected: Docker + ./scripts/docker-up.sh OR local Postgres (planning/LOCAL_POSTGRES_SETUP.md)"

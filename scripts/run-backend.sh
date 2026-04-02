@@ -14,9 +14,9 @@ if command -v docker >/dev/null 2>&1 && docker info >/dev/null 2>&1; then
     sleep 1
   done
 else
-  echo "Warning: Docker not installed or daemon not running."
-  echo "  Install/start Docker Desktop, or run: ./scripts/docker-up.sh"
-  echo "  Or point backend/.env DATABASE_URL at any Postgres on 127.0.0.1:5432 (user/db: eventhub)."
+  echo "Warning: Docker not available."
+  echo "  Option A: Install/start Docker, then ./scripts/docker-up.sh"
+  echo "  Option B (no Docker): planning/LOCAL_POSTGRES_SETUP.md — local Postgres + scripts/init_local_db.sql"
 fi
 
 cd "$ROOT/backend"
