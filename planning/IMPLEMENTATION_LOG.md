@@ -98,11 +98,13 @@ Aligned with `CONTEXT.md`, `MASTER_IMPLEMENTATION_PLAN.md`, `reference_docs/db_d
 
 ## 4. How to run (reviewer checklist)
 
-1. `docker compose up -d` (Postgres).
-2. `cd backend && pip install -r requirements.txt && alembic upgrade head`
-3. Optional: `python -m scripts.seed_demo_events`
-4. `uvicorn main:app --reload --port 8000`
-5. `cd frontend && npm run dev` → **Sign in (dev)** in header → browse events / create event.
+1. **One-shot (from repo root):** `./scripts/run-backend.sh` — brings up Docker Postgres if `docker` exists, installs venv deps, copies `.env.example` → `.env` if missing, `alembic upgrade head`, then uvicorn on **8000**.
+2. Or manually: `docker compose up -d` (Postgres).
+3. `cd backend && pip install -r requirements.txt && alembic upgrade head`
+4. Optional: `python -m scripts.seed_demo_events`
+5. From **`backend/`**: `uvicorn main:app --reload --host 127.0.0.1 --port 8000` (must be this `main:app`, not a stub).
+6. Open [http://127.0.0.1:8000/](http://127.0.0.1:8000/) — should JSON (not 404); [http://127.0.0.1:8000/health](http://127.0.0.1:8000/health) must show `"db":"connected"` for events/login to work.
+7. `cd frontend && npm run dev` → **Sign in (dev)** → browse events.
 
 ---
 

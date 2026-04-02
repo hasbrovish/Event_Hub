@@ -21,6 +21,17 @@ def create_app() -> FastAPI:
         allow_methods=["*"],
         allow_headers=["*"],
     )
+
+    @application.get("/", tags=["meta"])
+    def root() -> dict:
+        return {
+            "service": settings.app_name,
+            "docs": "/docs",
+            "openapi": "/openapi.json",
+            "health": "/health",
+            "note": "If /health shows db unreachable, run: docker compose up -d && cd backend && alembic upgrade head",
+        }
+
     application.include_router(health.router)
     application.include_router(auth.router)
     application.include_router(events.router)
