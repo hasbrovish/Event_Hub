@@ -158,6 +158,10 @@ Aligned with `CONTEXT.md`, `MASTER_IMPLEMENTATION_PLAN.md`, `reference_docs/db_d
 - Root **`README.md`**: quick start, Postgres options (Docker vs local Mac), scripts, doc index, dev URLs.
 - **`planning/IMPLEMENTED_FEATURES.md`**: technical reference for all implemented API routes, frontend routes, stack, tooling, backlog pointer.
 
+### 2026-04-02 (DB schema in technical doc)
+
+- **`planning/IMPLEMENTED_FEATURES.md` § 7**: full PostgreSQL schema from ORM — ER mermaid, per-table columns/FKs, API usage vs schema-only tables, migration note.
+
 ---
 
 *Append new dated sections below as features land.*

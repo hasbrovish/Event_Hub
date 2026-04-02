@@ -52,9 +52,9 @@ API JSON uses **snake_case**. The frontend maps to UI types in `frontend/src/lib
 - **Registrations:** Capacity vs `slots`; overflow → `waitlisted`; cancel from `registered` may promote waitlist.
 - **Auth:** `Employee` + `EmployeeRole`; stable WID from dev email (`uuid5`); default `Preference` row on first dev login.
 
-### 2.3 Database models (tables created by Alembic initial migration)
+### 2.3 Database models
 
-Core tables used by the API: `employees`, `employee_roles`, `preferences`, `events`, `sessions`, `registrations`, `approval_requests`, plus `groups`, `group_admins`, `notifications`, `campaigns` (schema present; most APIs not built yet). See `reference_docs/db_design.md`.
+Physical schema is defined by **SQLAlchemy models** under `backend/app/models/` and applied by Alembic revision `20250402_0001_initial_schema` (`metadata.create_all`). A **full table-by-table design** is in **[§ 7](#7-database-schema-design-postgresql)** below. Product-level ER notes: `reference_docs/db_design.md`.
 
 ---
 
@@ -121,7 +121,78 @@ For detail see `planning/IMPLEMENTATION_LOG.md` § backlog:
 
 ---
 
-## 7. Key file map
+## 7. Database schema design (PostgreSQL)
+
+### 7.1 Principles
+
+- **PK types:** `employees.wid` and all employee FKs use **UUID**. `events.id` is **UUID** with default `gen_random_uuid()` (requires PostgreSQL crypto/pgcrypto availability as per server defaults).
+- **Strings for enums:** Status and role-like fields are **varchar** in DB (e.g. `events.status`, `registrations.status`, `approval_requests.status`); application code enforces allowed values.
+- **Timestamps:** Important columns use `TIMESTAMPTZ` (`DateTime(timezone=True)`).
+- **Arrays:** PostgreSQL `ARRAY` for tags, preferences, campaign channel lists, etc.
+
+### 7.2 Entity relationships (overview)
+
+```mermaid
+erDiagram
+  employees ||--o{ employee_roles : has
+  employees ||--o| preferences : has
+  employees ||--o{ registrations : registers
+  employees ||--o{ group_admins : admin_of
+  groups ||--o{ group_admins : has
+  groups ||--o{ events : scopes_optional
+  employees ||--o{ events : creates
+  employees ||--o{ events : approves_optional
+  events ||--o{ sessions : contains
+  events ||--o{ approval_requests : governed_by
+  events ||--o{ registrations : receives
+  events ||--o{ notifications : optional_link
+  events ||--o{ campaigns : optional_link
+  employees ||--o{ notifications : receives
+  employees ||--o{ campaigns : creates
+```
+
+### 7.3 Tables (columns & constraints)
+
+**`employees`** — person; PK `wid` UUID. Columns: `source_id` (unique, nullable), `first_name`, `last_name`, `email` (unique), org fields (`job_title`, `job_role`, `department_name`, `unit_name`, `sub_department_name`, `region`, `current_location`, `base_location`), `is_manager`, `manager_wid` → `employees.wid` ON DELETE SET NULL, `is_active`, `created_at`, `updated_at`.  
+**API:** auth / event ownership / registrations / approvals.
+
+**`employee_roles`** — PK `id` serial. `employee_wid` → `employees.wid` ON DELETE CASCADE, `role` varchar(50). **Unique** `(employee_wid, role)`.  
+**API:** JWT claims / `require_roles`.
+
+**`preferences`** — PK `id` serial. `employee_wid` → `employees.wid` ON DELETE CASCADE **unique**. Arrays: `event_types`, `interests`, `notification_mechanisms`, `notification_times`, `followed_group_ids`; `notification_frequency`, `notify_on_login`, `updated_at`.  
+**API:** row created on dev login; **no read/write API yet**.
+
+**`groups`** — PK `id` serial. `name`, `description`, `org` (default Infosys), `geo`, `unit`, `subunit`, `location`, `dl_emails` array, `is_active`, `created_by` → `employees.wid`, `created_at`.  
+**API:** optional `events.group_id`; **no group CRUD API yet**.
+
+**`group_admins`** — composite PK `(group_id, employee_wid)` → `groups.id` / `employees.wid` ON DELETE CASCADE, `assigned_at`.  
+**API:** **not used by routes yet**.
+
+**`events`** — PK `id` UUID default `gen_random_uuid()`. `title`, `description`, `thumbnail_url`, `banner_url`, `event_type`, `tags` array, `delivery_method`, `instruction_medium`, `start_date`, `end_date`, `timezone`, `venue_code`, `venue_name`, `event_url`, `slots` (capacity), `status`, `visibility`, `group_id` → `groups.id` nullable, `created_by` / `approved_by` → `employees.wid`, `approved_at`, `created_at`, `updated_at`.  
+**API:** full event lifecycle + list filters.
+
+**`sessions`** (table name `sessions`) — PK `id` serial. `event_id` → `events.id` ON DELETE CASCADE, `session_order`, `topic`, `topic_brief`, `start_datetime`, `duration_minutes`, `speaker_wid` → `employees.wid`, denormalized `speaker_*` fields, `speaker_linkedin`, `speaker_headshot_url`, `session_url`, `created_at`.  
+**API:** embedded in event detail / create.
+
+**`registrations`** — PK `id` serial. `employee_wid` → `employees.wid` ON DELETE CASCADE, `event_id` → `events.id` ON DELETE CASCADE, `status` (e.g. registered / waitlisted / cancelled), `added_to_calendar`, `registered_at`. **Unique** `(employee_wid, event_id)`.  
+**API:** register / cancel / my registrations.
+
+**`approval_requests`** — PK `id` serial. `event_id` → `events.id` ON DELETE CASCADE, `requested_by` / `reviewed_by` → `employees.wid`, `status`, `request_note`, `review_comment`, `requested_at`, `reviewed_at`.  
+**API:** submit + pending list + PATCH review.
+
+**`notifications`** — PK `id` serial. `employee_wid` → `employees.wid` ON DELETE CASCADE, optional `event_id` → `events.id`, `type`, `title`, `body`, `is_read`, `created_at`.  
+**API:** **not implemented** (table ready).
+
+**`campaigns`** — PK `id` serial. `event_id` → `events.id` ON DELETE CASCADE, `created_by` → `employees.wid`, `message`, `teams_channel_ids` / `viva_group_ids` arrays, `infyme_banner`, `scheduled_at`, `status`, `posted_at`, `failure_reason`, `created_at`.  
+**API:** **not implemented** (table ready).
+
+### 7.4 Migration
+
+- **Revision:** `backend/alembic/versions/20250402_0001_initial_schema.py` — `upgrade()` calls `Base.metadata.create_all(bind)` for all models imported on `Base.metadata`.
+
+---
+
+## 8. Key file map
 
 | Area | Paths |
 |------|--------|
