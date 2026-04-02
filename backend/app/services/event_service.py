@@ -312,14 +312,29 @@ async def submit_for_approval(db: AsyncSession, event_id: uuid.UUID, actor: Empl
     if ev.status != "Draft":
         raise ValueError("invalid_status")
     ev.status = "Pending Approval"
-    db.add(
-        ApprovalRequest(
-            event_id=ev.id,
-            requested_by=actor.wid,
-            status="Pending",
-            request_note=note,
+    reuse = (
+        await db.execute(
+            select(ApprovalRequest).where(
+                ApprovalRequest.event_id == ev.id,
+                ApprovalRequest.status == "Modification Requested",
+            )
         )
-    )
+    ).scalar_one_or_none()
+    if reuse is not None:
+        reuse.status = "Pending"
+        reuse.request_note = note
+        reuse.reviewed_by = None
+        reuse.reviewed_at = None
+        reuse.review_comment = None
+    else:
+        db.add(
+            ApprovalRequest(
+                event_id=ev.id,
+                requested_by=actor.wid,
+                status="Pending",
+                request_note=note,
+            )
+        )
     await db.flush()
     return ev
 

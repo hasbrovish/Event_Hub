@@ -35,11 +35,12 @@ Aligned with `CONTEXT.md`, `MASTER_IMPLEMENTATION_PLAN.md`, `reference_docs/db_d
 | Events service | `app/services/event_service.py` | List/detail DTOs, create/update/delete, submit → `ApprovalRequest`, registration counts, `my_registration_status` on detail. |
 | Registrations service | `app/services/registration_service.py` | Register (slots vs waitlist, re-register from `cancelled`), cancel + waitlist promote, `list_my_registrations`. |
 | Registrations router | `app/routers/registrations.py` | `GET /registrations/me`. |
-| Schemas | `app/schemas/registration.py` | Registration action + my-registrations DTOs. |
-| Schemas | `app/schemas/auth.py`, `app/schemas/event.py` | Login, me, CRUD + list/detail shapes. |
+| Approvals service | `app/services/approval_service.py` | List pending; review → Active / Rejected / Draft + modification. |
+| Approvals router | `app/routers/approvals.py` | `GET /approvals/pending`, `PATCH /approvals/{id}`. |
+| Schemas | `app/schemas/auth.py`, `event.py`, `registration.py`, `approval.py` | Auth, events, registrations, approvals DTOs. |
 | Routers | `app/routers/auth.py` | `POST /auth/login`, `POST /auth/login/sso` (501), `GET /auth/me`. |
 | Routers | `app/routers/events.py` | Full CRUD subset + submit + `POST`/`DELETE /events/{id}/register`. |
-| App | `app/main.py` | Registers `auth` + `events` + `registrations`. |
+| App | `app/main.py` | Registers `auth` + `events` + `registrations` + `approvals`. |
 | Entry | `main.py` | Still `uvicorn main:app`. |
 | Deps | `requirements.txt` | `python-jose[cryptography]`, `email-validator`. |
 | Env template | `.env.example` | DB URLs + JWT + `ALLOW_DEV_LOGIN`. |
@@ -58,6 +59,8 @@ Aligned with `CONTEXT.md`, `MASTER_IMPLEMENTATION_PLAN.md`, `reference_docs/db_d
 - `POST /events/{id}/submit` — Draft → Pending Approval + approval row
 - `POST /events/{id}/register`, `DELETE /events/{id}/register` — register / cancel (waitlist promote on seated cancel)
 - `GET /registrations/me` — current user’s registered + waitlisted events as `EventListItem`
+- `GET /approvals/pending` — organizer / admin / platform_admin inbox
+- `PATCH /approvals/{id}` — body `decision`: `approve` \| `reject` \| `request_modification` (+ optional `review_comment`)
 
 ### Not implemented yet (master plan backlog)
 
@@ -114,6 +117,11 @@ Aligned with `CONTEXT.md`, `MASTER_IMPLEMENTATION_PLAN.md`, `reference_docs/db_d
 
 - Backend: `registration_service`, register/cancel routes on events, `GET /registrations/me`, `EventDetailOut.my_registration_status`.
 - Frontend: `useRegistrations`, Event detail + Event card + Calendar wired to API.
+
+### 2026-04-02 (approvals review)
+
+- `approval_service` + `PATCH /approvals/{id}`; `GET /approvals/pending` for reviewers.
+- Re-submit after **modification requested** reopens the same `approval_requests` row instead of inserting a duplicate.
 
 ---
 
