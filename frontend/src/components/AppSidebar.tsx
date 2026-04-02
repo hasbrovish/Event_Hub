@@ -11,7 +11,7 @@ import {
   ChevronDown,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
-import { useRole, UserRole } from "@/contexts/RoleContext";
+import { useAuth, type UserRole } from "@/contexts/AuthContext";
 import {
   Sidebar,
   SidebarContent,
@@ -85,7 +85,7 @@ const roleMenuItems: Record<UserRole, typeof audienceItems> = {
 export function AppSidebar() {
   const { state } = useSidebar();
   const collapsed = state === "collapsed";
-  const { role, setRole } = useRole();
+  const { role, setRole, availableRoles } = useAuth();
   const items = roleMenuItems[role];
   const RoleIcon = roleIcons[role];
 
@@ -150,15 +150,17 @@ export function AppSidebar() {
             </button>
           </DropdownMenuTrigger>
           <DropdownMenuContent side="top" align="start" className="w-48">
-            {(Object.keys(roleLabels) as UserRole[]).map((r) => {
-              const Icon = roleIcons[r];
-              return (
-                <DropdownMenuItem key={r} onClick={() => setRole(r)} className={role === r ? "bg-accent" : ""}>
-                  <Icon className="mr-2 h-4 w-4" />
-                  {roleLabels[r]}
-                </DropdownMenuItem>
-              );
-            })}
+            {(Object.keys(roleLabels) as UserRole[])
+              .filter((r) => availableRoles.includes(r))
+              .map((r) => {
+                const Icon = roleIcons[r];
+                return (
+                  <DropdownMenuItem key={r} onClick={() => setRole(r)} className={role === r ? "bg-accent" : ""}>
+                    <Icon className="mr-2 h-4 w-4" />
+                    {roleLabels[r]}
+                  </DropdownMenuItem>
+                );
+              })}
           </DropdownMenuContent>
         </DropdownMenu>
       </SidebarFooter>

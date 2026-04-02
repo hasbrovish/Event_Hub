@@ -75,7 +75,7 @@ Built as a **desktop + web hybrid** using:
 | `organizer` | Group-mapped admin | Create/approve events, manage campaigns |
 | `admin` | Platform admin | Full access, logs, config, access matrix |
 
-Role is stored in `RoleContext` (`frontend/src/contexts/RoleContext.tsx`). Default: `audience`.
+Role is stored in `AuthContext` (`frontend/src/contexts/AuthContext.tsx`): JWT-backed user, `availableRoles`, and active UI persona. Default before sign-in: `audience`.
 
 ---
 
@@ -87,7 +87,7 @@ Event_Hub/
 ├── frontend/                 # React app (TypeScript, Vite, Tailwind, shadcn/ui)
 │   └── src/
 │       ├── App.tsx           # Router (BrowserRouter or HashRouter for Electron)
-│       ├── contexts/RoleContext.tsx
+│       ├── contexts/AuthContext.tsx
 │       ├── data/mockEvents.ts
 │       ├── components/
 │       │   ├── AppLayout.tsx
@@ -106,8 +106,11 @@ Event_Hub/
 │           ├── Campaigns.tsx
 │           └── AdminPanel.tsx
 ├── backend/
-│   ├── main.py               # FastAPI app — CORS + GET /health only
-│   └── requirements.txt      # fastapi, uvicorn
+│   ├── main.py               # Uvicorn entry → `app.main:app`
+│   ├── app/                  # FastAPI package (routers, models, config)
+│   ├── alembic/              # Migrations (PostgreSQL)
+│   ├── requirements.txt
+│   └── .env.example
 ├── electron/
 │   ├── main.cjs              # Spawns backend, opens BrowserWindow
 │   └── preload.cjs
@@ -160,9 +163,9 @@ Event_Hub/
 | Server | Uvicorn >= 0.32.0 |
 | Language | Python |
 | Dev port | 8000 |
-| DB | Not yet connected |
-| Auth | Not yet implemented |
-| Routes | GET /health only |
+| DB | PostgreSQL (see `docker-compose.yml`, `backend/alembic/`) — run `alembic upgrade head` after DB is up |
+| Auth | JWT; `POST /auth/login` (dev); `GET /auth/me`; SSO stub `POST /auth/login/sso` → 501 |
+| Routes | `GET /health`, `POST /auth/login`, `GET /auth/me`, `GET/PATCH/DELETE /events`, `POST /events/{id}/submit` — see `planning/IMPLEMENTATION_LOG.md` |
 
 **CORS allowed:** `localhost:8080`, `127.0.0.1:8080`, `[::1]:8080`
 
@@ -214,9 +217,9 @@ Cache unit/sub-unit responses with 1-hour TTL.
 
 | Feature | Status |
 |---|---|
-| Event listing | Mock (`mockEvents.ts`) |
-| User profile | Mock (hardcoded "JD" avatar) |
-| Role switching | Mock (RoleContext dropdown) |
+| Event listing | **API** `GET /events` (seed via `python -m scripts.seed_demo_events`) |
+| User profile | **API** `/auth/me` after dev sign-in; initials in header |
+| Role switching | Real roles from `/auth/me`; sidebar shows only assigned roles |
 | Registration | Mock (no API) |
 | Notifications | Mock |
 | Campaigns | Mock |
@@ -285,11 +288,16 @@ interface EventData {
 npm install
 cd frontend && npm install
 
+# PostgreSQL (local)
+docker compose up -d   # from repo root — user/pass/db: eventhub
+
 # Setup Python backend
 cd backend
 python -m venv .venv
 source .venv/bin/activate  # or .venv\Scripts\activate on Windows
 pip install -r requirements.txt
+cp .env.example .env       # optional; defaults match docker compose
+alembic upgrade head       # create tables
 
 # Run (Electron + Vite + FastAPI concurrently)
 npm run dev

@@ -1,16 +1,22 @@
 import { ReactNode } from "react";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
-import { RoleProvider } from "@/contexts/RoleContext";
+import { useAuth } from "@/contexts/AuthContext";
 import { Bell, HelpCircle, Mic, Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
+import { BackendStatusPill } from "@/components/BackendStatusPill";
 
-export function AppLayout({ children }: { children: ReactNode }) {
+function AppLayoutInner({ children }: { children: ReactNode }) {
+  const { user, isAuthenticated, loginDev, loginPending, logout } = useAuth();
+  const initials =
+    user && (user.first_name || user.last_name)
+      ? `${user.first_name?.[0] ?? ""}${user.last_name?.[0] ?? ""}`.toUpperCase() || "?"
+      : "JD";
+
   return (
-    <RoleProvider>
       <SidebarProvider>
         <div className="min-h-screen flex w-full bg-background">
           <AppSidebar />
@@ -66,6 +72,28 @@ export function AppLayout({ children }: { children: ReactNode }) {
               </div>
 
               <div className="flex items-center gap-1 sm:gap-2 ml-auto shrink-0">
+                <BackendStatusPill />
+                {!isAuthenticated ? (
+                  <Button
+                    type="button"
+                    size="sm"
+                    className="hidden sm:inline-flex rounded-full bg-white/15 hover:bg-white/25 text-white border-0 text-xs font-semibold"
+                    disabled={loginPending}
+                    onClick={() => void loginDev()}
+                  >
+                    {loginPending ? "Signing in…" : "Sign in (dev)"}
+                  </Button>
+                ) : (
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="hidden sm:inline-flex text-white/90 hover:bg-white/15 text-xs"
+                    onClick={() => logout()}
+                  >
+                    Sign out
+                  </Button>
+                )}
                 <span className="hidden lg:inline text-sm text-white/90 font-medium px-2">
                   Web Apps / Services
                 </span>
@@ -86,7 +114,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
                 </Button>
                 <Avatar className="h-9 w-9 cursor-pointer ring-2 ring-white/30">
                   <AvatarFallback className="bg-white/90 text-infy-purple text-xs font-semibold">
-                    JD
+                    {initials}
                   </AvatarFallback>
                 </Avatar>
               </div>
@@ -95,6 +123,9 @@ export function AppLayout({ children }: { children: ReactNode }) {
           </div>
         </div>
       </SidebarProvider>
-    </RoleProvider>
   );
+}
+
+export function AppLayout({ children }: { children: ReactNode }) {
+  return <AppLayoutInner>{children}</AppLayoutInner>;
 }

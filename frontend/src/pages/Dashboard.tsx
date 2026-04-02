@@ -1,11 +1,12 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { mockEvents } from "@/data/mockEvents";
 import { EventCard } from "@/components/EventCard";
 import { Button } from "@/components/ui/button";
 import { Calendar, LayoutGrid, List, Plus, TrendingUp, Users, Zap } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
+import { useEvents } from "@/hooks/useEvents";
+import { mapListItemToEventData } from "@/lib/eventMap";
 
 const categories = ["all", "tech", "domain", "health", "fun", "product"] as const;
 const categoryLabels: Record<string, string> = {
@@ -21,15 +22,29 @@ export default function Dashboard() {
   const [activeCategory, setActiveCategory] = useState<string>("all");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
 
-  const filteredEvents =
-    activeCategory === "all" ? mockEvents : mockEvents.filter((e) => e.category === activeCategory);
+  const { data, isPending, isError, refetch } = useEvents({
+    category: activeCategory === "all" ? undefined : activeCategory,
+    page: 1,
+    page_size: 100,
+  });
 
-  const liveEvents = mockEvents.filter((e) => e.status === "live");
-  const upcomingCount = mockEvents.filter((e) => e.status === "upcoming").length;
-  const registeredCount = mockEvents.filter((e) => e.isRegistered).length;
+  const events = useMemo(() => (data?.items ?? []).map(mapListItemToEventData), [data]);
+
+  const liveEvents = events.filter((e) => e.status === "live");
+  const upcomingCount = events.filter((e) => e.status === "upcoming").length;
+  const registeredCount = events.filter((e) => e.isRegistered).length;
 
   return (
     <div className="p-5 md:p-6 max-w-7xl mx-auto space-y-6 animate-fade-in">
+      {isError && (
+        <div className="rounded-xl border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm flex flex-wrap items-center justify-between gap-2">
+          <span>Could not load events from the API. Is the backend running and the database migrated?</span>
+          <Button size="sm" variant="outline" onClick={() => void refetch()}>
+            Retry
+          </Button>
+        </div>
+      )}
+
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <Card className="shadow-card border-border/50 rounded-2xl overflow-hidden">
           <CardContent className="p-4 flex items-center gap-3">
@@ -81,8 +96,9 @@ export default function Dashboard() {
             <Button
               size="sm"
               className="shrink-0 rounded-full px-5 bg-infy-gold text-accent-foreground hover:bg-infy-gold/90 font-semibold shadow-md border-0"
+              asChild
             >
-              Join now
+              <Link to={`/event/${liveEvents[0].id}`}>Join now</Link>
             </Button>
           </CardContent>
         </Card>
@@ -93,7 +109,7 @@ export default function Dashboard() {
           <div>
             <h2 className="text-lg font-bold text-foreground tracking-tight">Events to participate</h2>
             <p className="text-sm text-muted-foreground mt-0.5">
-              Based on your preferences — filter by category below.
+              Data from PostgreSQL via <code className="text-xs">GET /events</code>.
             </p>
           </div>
           <Link
@@ -143,25 +159,33 @@ export default function Dashboard() {
           </div>
         </div>
 
-        <div
-          className={
-            viewMode === "grid"
-              ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
-              : "flex flex-col gap-3"
-          }
-        >
-          {filteredEvents.map((event, idx) => (
-            <div key={event.id} style={{ animationDelay: `${idx * 50}ms` }} className="animate-fade-in">
-              <EventCard event={event} />
-            </div>
-          ))}
-        </div>
+        {isPending ? (
+          <p className="text-sm text-muted-foreground py-8 text-center">Loading events…</p>
+        ) : (
+          <div
+            className={
+              viewMode === "grid"
+                ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
+                : "flex flex-col gap-3"
+            }
+          >
+            {events.map((event, idx) => (
+              <div key={event.id} style={{ animationDelay: `${idx * 50}ms` }} className="animate-fade-in">
+                <EventCard event={event} />
+              </div>
+            ))}
+          </div>
+        )}
 
-        {filteredEvents.length === 0 && (
+        {!isPending && events.length === 0 && (
           <div className="text-center py-14 text-muted-foreground rounded-xl bg-card/50 border border-dashed border-border/60 mt-2">
             <TrendingUp className="h-12 w-12 mx-auto mb-3 opacity-25 text-infy-purple" />
-            <p className="font-semibold text-foreground">No events in this category</p>
-            <p className="text-sm mt-1">Try another filter or check back later.</p>
+            <p className="font-semibold text-foreground">No events yet</p>
+            <p className="text-sm mt-1 max-w-md mx-auto">
+              Run{" "}
+              <code className="text-xs bg-muted px-1 rounded">python -m scripts.seed_demo_events</code> from
+              the backend folder (after migrations), or create an event.
+            </p>
           </div>
         )}
       </section>

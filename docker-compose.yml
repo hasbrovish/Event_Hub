@@ -1,0 +1,21 @@
+# Local PostgreSQL for Event Hub (Phase 1+). Aligns with MASTER_IMPLEMENTATION_PLAN + db_design.md
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: eventhub-pg
+    environment:
+      POSTGRES_USER: eventhub
+      POSTGRES_PASSWORD: eventhub
+      POSTGRES_DB: eventhub
+    ports:
+      - "5432:5432"
+    volumes:
+      - eventhub_pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U eventhub -d eventhub"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  eventhub_pg_data:

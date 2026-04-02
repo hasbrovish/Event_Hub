@@ -1,22 +1,5 @@
-from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
+"""Run from `backend/`: uvicorn main:app --reload --host 127.0.0.1 --port 8000"""
 
-app = FastAPI()
+from app.main import app
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=[
-        "http://127.0.0.1:8080",
-        "http://localhost:8080",
-        "http://[::1]:8080",
-        "null",
-    ],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
-
-@app.get("/health")
-def health():
-    return {"status": "ok"}
+__all__ = ["app"]

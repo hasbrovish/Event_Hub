@@ -1,11 +1,12 @@
-import { useParams, useNavigate } from "react-router-dom";
-import { mockEvents } from "@/data/mockEvents";
+import { useParams, useNavigate, Link } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { ArrowLeft, Calendar, Clock, MapPin, Users, Share2, CalendarPlus, Linkedin } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
+import { useEventDetail } from "@/hooks/useEvents";
+import { mapDetailToEventData } from "@/lib/eventMap";
 
 const categoryLabels: Record<string, string> = {
   tech: "Technology",
@@ -26,18 +27,30 @@ const categoryStyles: Record<string, string> = {
 export default function EventDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const event = mockEvents.find((e) => e.id === id);
+  const { data: raw, isPending, isError } = useEventDetail(id);
 
-  if (!event) {
+  const event = raw ? mapDetailToEventData(raw) : null;
+
+  if (isPending) {
     return (
-      <div className="p-6 text-center">
-        <p className="text-muted-foreground">Event not found.</p>
-        <Button variant="outline" onClick={() => navigate("/")} className="mt-4">Go Back</Button>
+      <div className="p-6 max-w-4xl mx-auto">
+        <p className="text-muted-foreground">Loading event…</p>
       </div>
     );
   }
 
-  const fillPercent = Math.round((event.attendees / event.maxAttendees) * 100);
+  if (isError || !event || !raw) {
+    return (
+      <div className="p-6 text-center max-w-4xl mx-auto">
+        <p className="text-muted-foreground">Event not found.</p>
+        <Button variant="outline" onClick={() => navigate("/")} className="mt-4">
+          Back to dashboard
+        </Button>
+      </div>
+    );
+  }
+
+  const fillPercent = Math.round((event.attendees / Math.max(1, event.maxAttendees)) * 100);
 
   return (
     <div className="p-6 max-w-4xl mx-auto space-y-6 animate-fade-in">
@@ -46,7 +59,6 @@ export default function EventDetail() {
       </Button>
 
       <div className="flex flex-col lg:flex-row gap-6">
-        {/* Main Content */}
         <div className="flex-1 space-y-6">
           <div>
             <div className="flex items-center gap-2 mb-3">
@@ -65,12 +77,11 @@ export default function EventDetail() {
 
           <Separator />
 
-          {/* Speaker Card */}
           <Card className="shadow-card border-border/50 rounded-2xl">
             <CardContent className="p-4 flex items-center gap-4">
               <Avatar className="h-14 w-14">
                 <AvatarFallback className="bg-primary/10 text-primary font-semibold text-lg">
-                  {event.speaker.name.split(" ").map(n => n[0]).join("")}
+                  {event.speaker.name.split(" ").map((n) => n[0]).join("")}
                 </AvatarFallback>
               </Avatar>
               <div className="flex-1">
@@ -83,26 +94,52 @@ export default function EventDetail() {
             </CardContent>
           </Card>
 
-          {/* Tags */}
+          {raw.sessions.length > 0 && (
+            <div>
+              <h2 className="font-semibold mb-2">Sessions</h2>
+              <ul className="space-y-2 text-sm">
+                {raw.sessions.map((s) => (
+                  <li key={s.id} className="rounded-lg border border-border/60 p-3">
+                    <p className="font-medium">{s.topic}</p>
+                    {s.topic_brief && <p className="text-muted-foreground">{s.topic_brief}</p>}
+                    <p className="text-xs text-muted-foreground mt-1">
+                      {new Date(s.start_datetime).toLocaleString()} · {s.duration_minutes} min
+                    </p>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
           <div className="flex flex-wrap gap-2">
             {event.tags.map((tag) => (
-              <Badge key={tag} variant="secondary" className="text-xs">{tag}</Badge>
+              <Badge key={tag} variant="secondary" className="text-xs">
+                {tag}
+              </Badge>
             ))}
           </div>
         </div>
 
-        {/* Sidebar Info */}
         <div className="w-full lg:w-80 space-y-4">
           <Card className="shadow-card border-border/50 rounded-2xl">
             <CardContent className="p-5 space-y-4">
               <div className="space-y-3 text-sm">
                 <div className="flex items-center gap-3">
                   <Calendar className="h-4 w-4 text-primary" />
-                  <span>{new Date(event.date).toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric", year: "numeric" })}</span>
+                  <span>
+                    {new Date(event.date + "T12:00:00").toLocaleDateString("en-US", {
+                      weekday: "long",
+                      month: "long",
+                      day: "numeric",
+                      year: "numeric",
+                    })}
+                  </span>
                 </div>
                 <div className="flex items-center gap-3">
                   <Clock className="h-4 w-4 text-primary" />
-                  <span>{event.time} · {event.duration}</span>
+                  <span>
+                    {event.time} · {event.duration}
+                  </span>
                 </div>
                 <div className="flex items-center gap-3">
                   <MapPin className="h-4 w-4 text-primary" />
@@ -113,7 +150,7 @@ export default function EventDetail() {
                   <div className="flex-1">
                     <div className="flex justify-between text-xs mb-1">
                       <span>{event.attendees} registered</span>
-                      <span>{event.maxAttendees - event.attendees} spots left</span>
+                      <span>{Math.max(0, event.maxAttendees - event.attendees)} spots left</span>
                     </div>
                     <div className="w-full h-2 bg-muted rounded-full overflow-hidden">
                       <div className="h-full rounded-full bg-primary" style={{ width: `${fillPercent}%` }} />
@@ -125,15 +162,17 @@ export default function EventDetail() {
               <Separator />
 
               <div className="space-y-2">
-                <Button className="w-full rounded-full font-semibold shadow-sm" size="lg">
-                  {event.isRegistered ? "Registered ✓" : "Register now"}
+                <Button className="w-full rounded-full font-semibold shadow-sm" size="lg" disabled>
+                  {event.isRegistered ? "Registered ✓" : "Register now (API next phase)"}
                 </Button>
                 <div className="flex gap-2">
-                  <Button variant="outline" className="flex-1 gap-1" size="sm">
+                  <Button variant="outline" className="flex-1 gap-1" size="sm" disabled>
                     <CalendarPlus className="h-3.5 w-3.5" /> Add to Calendar
                   </Button>
-                  <Button variant="outline" className="flex-1 gap-1" size="sm">
-                    <Share2 className="h-3.5 w-3.5" /> Share
+                  <Button variant="outline" className="flex-1" size="sm" asChild>
+                    <Link to="/" className="flex items-center justify-center gap-1">
+                      <Share2 className="h-3.5 w-3.5" /> Share
+                    </Link>
                   </Button>
                 </div>
               </div>
