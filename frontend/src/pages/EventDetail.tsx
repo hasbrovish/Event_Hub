@@ -54,7 +54,9 @@ export default function EventDetail() {
                 {categoryLabels[event.category]}
               </Badge>
               {event.status === "live" && (
-                <Badge className="bg-destructive text-destructive-foreground animate-pulse">● LIVE</Badge>
+                <Badge className="bg-orange-500 text-white border-0 font-bold uppercase text-[10px] tracking-wide">
+                  ● Live
+                </Badge>
               )}
             </div>
             <h1 className="text-3xl font-bold mb-2">{event.title}</h1>
@@ -64,7 +66,7 @@ export default function EventDetail() {
           <Separator />
 
           {/* Speaker Card */}
-          <Card className="shadow-card border-border/60">
+          <Card className="shadow-card border-border/50 rounded-2xl">
             <CardContent className="p-4 flex items-center gap-4">
               <Avatar className="h-14 w-14">
                 <AvatarFallback className="bg-primary/10 text-primary font-semibold text-lg">
@@ -91,7 +93,7 @@ export default function EventDetail() {
 
         {/* Sidebar Info */}
         <div className="w-full lg:w-80 space-y-4">
-          <Card className="shadow-card border-border/60">
+          <Card className="shadow-card border-border/50 rounded-2xl">
             <CardContent className="p-5 space-y-4">
               <div className="space-y-3 text-sm">
                 <div className="flex items-center gap-3">
@@ -123,8 +125,8 @@ export default function EventDetail() {
               <Separator />
 
               <div className="space-y-2">
-                <Button className="w-full" size="lg">
-                  {event.isRegistered ? "Registered ✓" : "Register Now"}
+                <Button className="w-full rounded-full font-semibold shadow-sm" size="lg">
+                  {event.isRegistered ? "Registered ✓" : "Register now"}
                 </Button>
                 <div className="flex gap-2">
                   <Button variant="outline" className="flex-1 gap-1" size="sm">

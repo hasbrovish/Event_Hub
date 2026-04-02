@@ -90,20 +90,20 @@ export function AppSidebar() {
   const RoleIcon = roleIcons[role];
 
   return (
-    <Sidebar collapsible="icon">
+    <Sidebar collapsible="icon" className="border-r border-sidebar-border shadow-sm shadow-black/[0.03]">
       <SidebarHeader className="p-4">
         {!collapsed && (
           <div className="flex items-center gap-2 mb-2">
-            <div className="h-8 w-8 rounded-lg gradient-hero flex items-center justify-center">
-              <Calendar className="h-4 w-4 text-primary-foreground" />
+            <div className="h-9 w-9 rounded-xl bg-infy-purple flex items-center justify-center shadow-md shadow-purple-950/15">
+              <Calendar className="h-4 w-4 text-white" />
             </div>
-            <span className="font-bold text-lg text-sidebar-primary">EventHub</span>
+            <span className="font-semibold text-lg tracking-tight text-sidebar-primary">Event Hub</span>
           </div>
         )}
         {collapsed && (
           <div className="flex justify-center mb-2">
-            <div className="h-8 w-8 rounded-lg gradient-hero flex items-center justify-center">
-              <Calendar className="h-4 w-4 text-primary-foreground" />
+            <div className="h-9 w-9 rounded-xl bg-infy-purple flex items-center justify-center shadow-md shadow-purple-950/15">
+              <Calendar className="h-4 w-4 text-white" />
             </div>
           </div>
         )}
@@ -123,7 +123,7 @@ export function AppSidebar() {
                       to={item.url}
                       end={item.url === "/"}
                       className="hover:bg-sidebar-accent/50 transition-colors"
-                      activeClassName="bg-sidebar-accent text-sidebar-primary font-medium"
+                      activeClassName="bg-sidebar-accent text-sidebar-primary font-semibold shadow-sm"
                     >
                       <item.icon className="mr-2 h-4 w-4" />
                       {!collapsed && <span>{item.title}</span>}

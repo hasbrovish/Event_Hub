@@ -61,11 +61,28 @@ export default {
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
         },
+        header: {
+          DEFAULT: "hsl(var(--header))",
+          foreground: "hsl(var(--header-foreground))",
+        },
+        surface: {
+          muted: "hsl(var(--surface-muted))",
+        },
+        infy: {
+          header: "hsl(var(--infy-header))",
+          purple: "hsl(var(--infy-purple))",
+          lavender: "hsl(var(--infy-lavender))",
+          link: "hsl(var(--infy-link))",
+          "link-hover": "hsl(var(--infy-link-hover))",
+          gold: "hsl(var(--infy-gold))",
+        },
       },
       borderRadius: {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
+        xl: "calc(var(--radius) + 4px)",
+        "2xl": "calc(var(--radius) + 8px)",
       },
       keyframes: {
         "accordion-down": {

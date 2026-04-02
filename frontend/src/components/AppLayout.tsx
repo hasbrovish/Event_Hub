@@ -2,46 +2,96 @@ import { ReactNode } from "react";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
 import { RoleProvider } from "@/contexts/RoleContext";
-import { Bell, Search } from "lucide-react";
+import { Bell, HelpCircle, Mic, Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { cn } from "@/lib/utils";
 
 export function AppLayout({ children }: { children: ReactNode }) {
   return (
     <RoleProvider>
       <SidebarProvider>
-        <div className="min-h-screen flex w-full">
+        <div className="min-h-screen flex w-full bg-background">
           <AppSidebar />
           <div className="flex-1 flex flex-col min-w-0">
-            <header className="h-14 flex items-center border-b bg-card px-4 gap-3 sticky top-0 z-10">
-              <SidebarTrigger className="shrink-0" />
-              <div className="flex-1 max-w-md">
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    placeholder="Search events, speakers, topics..."
-                    className="pl-9 bg-secondary border-0 h-9"
-                  />
+            <header
+              className={cn(
+                "min-h-14 flex flex-wrap items-center gap-3 px-4 py-2 sm:py-0 sm:h-16",
+                "bg-infy-header text-white shadow-md shadow-black/10 sticky top-0 z-20",
+              )}
+            >
+              <div className="flex items-center gap-3 shrink-0">
+                <SidebarTrigger
+                  className="text-white hover:bg-white/15 hover:text-white border-0 h-9 w-9"
+                />
+                <div className="hidden sm:flex items-center gap-2 pr-2 border-r border-white/20">
+                  <span className="font-semibold text-lg tracking-tight text-white">
+                    Event Hub
+                  </span>
                 </div>
               </div>
-              <div className="flex items-center gap-2 ml-auto">
-                <Button variant="ghost" size="icon" className="relative">
-                  <Bell className="h-4 w-4" />
-                  <span className="absolute -top-0.5 -right-0.5 h-4 w-4 rounded-full bg-destructive text-destructive-foreground text-[10px] flex items-center justify-center font-medium">
-                    3
-                  </span>
+
+              <div className="flex-1 flex justify-center min-w-0 order-last sm:order-none w-full sm:w-auto">
+                <div className="relative w-full max-w-2xl">
+                  <Input
+                    placeholder="Search for events, speakers, topics and more"
+                    className={cn(
+                      "h-10 w-full rounded-full border-0 bg-white/95 pl-4 pr-24",
+                      "text-foreground placeholder:text-muted-foreground shadow-sm",
+                      "focus-visible:ring-2 focus-visible:ring-white/40 focus-visible:ring-offset-2 focus-visible:ring-offset-[hsl(var(--infy-header))]",
+                    )}
+                  />
+                  <div className="absolute right-1.5 top-1/2 -translate-y-1/2 flex items-center gap-0.5">
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8 text-muted-foreground hover:text-foreground hover:bg-transparent"
+                      aria-label="Voice search"
+                    >
+                      <Mic className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8 text-muted-foreground hover:text-foreground hover:bg-transparent"
+                      aria-label="Search"
+                    >
+                      <Search className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-1 sm:gap-2 ml-auto shrink-0">
+                <span className="hidden lg:inline text-sm text-white/90 font-medium px-2">
+                  Web Apps / Services
+                </span>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="text-white hover:bg-white/15 h-9 w-9"
+                  aria-label="Help"
+                >
+                  <HelpCircle className="h-5 w-5" />
                 </Button>
-                <Avatar className="h-8 w-8 cursor-pointer">
-                  <AvatarFallback className="bg-primary text-primary-foreground text-xs font-semibold">
+                <Button variant="ghost" size="icon" className="relative text-white hover:bg-white/15 h-9 w-9">
+                  <Bell className="h-5 w-5" />
+                  <span
+                    className="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-infy-gold ring-2 ring-infy-header"
+                    aria-hidden
+                  />
+                </Button>
+                <Avatar className="h-9 w-9 cursor-pointer ring-2 ring-white/30">
+                  <AvatarFallback className="bg-white/90 text-infy-purple text-xs font-semibold">
                     JD
                   </AvatarFallback>
                 </Avatar>
               </div>
             </header>
-            <main className="flex-1 overflow-auto">
-              {children}
-            </main>
+            <main className="flex-1 overflow-auto">{children}</main>
           </div>
         </div>
       </SidebarProvider>
