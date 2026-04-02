@@ -114,6 +114,11 @@ Event_Hub/
 ├── electron/
 │   ├── main.cjs              # Spawns backend, opens BrowserWindow
 │   └── preload.cjs
+├── planning/
+│   ├── IMPLEMENTED_FEATURES.md  # Technical reference: implemented API/UI (kept current with code)
+│   ├── IMPLEMENTATION_LOG.md
+│   ├── LOCAL_POSTGRES_SETUP.md
+│   └── DOCKER_SETUP.md
 └── reference_docs/
     ├── PS.md                 # Product Statement
     └── db_design.md          # Full DB schema (SQL + MongoDB)
@@ -285,31 +290,11 @@ interface EventData {
 
 ## Dev Setup
 
-```bash
-# Install dependencies
-npm install
-cd frontend && npm install
+Authoritative step-by-step instructions (Docker **or** local Postgres, scripts, URLs): **[README.md](README.md)** at the repo root.
 
-# PostgreSQL (local)
-docker compose up -d   # from repo root — user/pass/db: eventhub
+**Local Postgres without Docker (e.g. corporate Mac):** [planning/LOCAL_POSTGRES_SETUP.md](planning/LOCAL_POSTGRES_SETUP.md) and `./scripts/setup-db.sh`.
 
-# Setup Python backend
-cd backend
-python -m venv .venv
-source .venv/bin/activate  # or .venv\Scripts\activate on Windows
-pip install -r requirements.txt
-cp .env.example .env       # optional; defaults match docker compose
-alembic upgrade head       # create tables
-
-# Run (Electron + Vite + FastAPI concurrently)
-npm run dev
-
-# Frontend only
-cd frontend && npm run dev  # → http://localhost:8080
-
-# Backend only
-cd backend && uvicorn main:app --reload --port 8000
-```
+**Implemented vs planned (technical):** [planning/IMPLEMENTED_FEATURES.md](planning/IMPLEMENTED_FEATURES.md).
 
 ---
 

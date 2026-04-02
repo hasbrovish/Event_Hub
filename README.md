@@ -1,106 +1,144 @@
-# EVENT-HUB
+# Event Hub
 
-Desktop application shell built with **Electron**, a **React** UI (Vite, TypeScript, Tailwind, shadcn-style components), and a **FastAPI** backend.
+Internal event discovery and governance platform: **React** UI (Vite, TypeScript, Tailwind), **FastAPI** API, **PostgreSQL** database. Optional **Electron** desktop shell.
 
 Repository: [github.com/hasbrovish/Event_Hub](https://github.com/hasbrovish/Event_Hub)
 
+**Technical feature list (what is implemented):** [`planning/IMPLEMENTED_FEATURES.md`](planning/IMPLEMENTED_FEATURES.md)
+
+---
+
 ## Prerequisites
 
-- **Node.js** and **npm** (use **npm 7+** for workspaces)
-- **Python 3.10+** for the `backend/` API
+- **Node.js** + **npm** (npm 7+ for workspaces)
+- **Python 3.10+**
+- **PostgreSQL** 14+ (16 recommended) — either:
+  - **Docker** (if allowed), or  
+  - **Local install** (e.g. Homebrew / Postgres.app on Mac) — see [`planning/LOCAL_POSTGRES_SETUP.md`](planning/LOCAL_POSTGRES_SETUP.md)
 
-Install JavaScript dependencies from the **repository root** only (`npm install`). The root `package.json` defines an npm workspace for `frontend/`.
+---
+
+## Quick start (web + API)
+
+### 1. Clone and JS dependencies
+
+```bash
+cd /path/to/Event_Hub
+npm install
+```
+
+### 2. Database
+
+**Option A — Docker** (from repo root):
+
+```bash
+./scripts/docker-up.sh
+```
+
+**Option B — Local Postgres on Mac (Homebrew example)**:
+
+```bash
+brew install postgresql@16
+brew services start postgresql@16
+# Add postgresql@16 bin to PATH if needed (brew hints after install)
+
+cd /path/to/Event_Hub
+export PGUSER=$(whoami)   # Homebrew often uses your macOS user, not "postgres"
+./scripts/setup-db.sh
+```
+
+This creates the `eventhub` user/database (if needed) and runs **`alembic upgrade head`**.
+
+### 3. Backend
+
+```bash
+cd backend
+python3 -m venv .venv
+.venv/bin/pip install -r requirements.txt
+cp -n .env.example .env
+# Edit .env if your Postgres host/port/user differ from defaults
+
+.venv/bin/alembic upgrade head   # safe to re-run
+.venv/bin/python -m scripts.seed_demo_events   # optional demo data
+.venv/bin/python -m uvicorn main:app --reload --host 127.0.0.1 --port 8000
+```
+
+Keep this terminal open. Check [http://127.0.0.1:8000/health](http://127.0.0.1:8000/health) — you want `"db":"connected"`.
+
+### 4. Frontend
+
+New terminal:
+
+```bash
+cd frontend
+npm install
+cp -n .env.example .env   # optional; default API is http://127.0.0.1:8000
+npm run dev
+```
+
+Open [http://127.0.0.1:8080](http://127.0.0.1:8080). Use **Sign in (dev)** in the header, then browse events.
+
+### One-shot helper (optional)
+
+From repo root (tries Docker if available, then migrate + API + Vite):
+
+```bash
+./scripts/run-all.sh
+```
+
+If Docker is not allowed, start Postgres yourself first, then run **`./scripts/setup-db.sh`** and start backend/frontend as above.
+
+---
 
 ## Repository layout
 
 | Path | Role |
 |------|------|
-| `frontend/` | Vite + React + TypeScript UI (npm workspace package) |
-| `backend/` | FastAPI app (`main.py`, `requirements.txt`); use a local `.venv` here |
-| `electron/` | Electron main process (`main.cjs`) and preload (`preload.cjs`) |
-| `scripts/` | Root tooling (e.g. `ensure-electron.cjs`, run from `postinstall` to finish Electron binary download if needed) |
+| `frontend/` | Vite + React + TypeScript (npm workspace) |
+| `backend/` | FastAPI app; run `uvicorn` from **`backend/`** with `main:app` |
+| `backend/app/` | Application package (routers, services, models) |
+| `backend/static/swagger-ui/` | Bundled Swagger UI (offline `/docs`) |
+| `electron/` | Electron main + preload (optional) |
+| `scripts/` | `setup-db.sh`, `docker-up.sh`, `run-backend.sh`, `run-all.sh`, etc. |
+| `planning/` | Implementation log, Docker/local DB guides, **implemented features** doc |
 
-## Setup
+---
 
-### 1. JavaScript (root)
+## Useful URLs (dev)
 
-```bash
-cd /path/to/EVENT-HUB
-npm install
-```
+| URL | Description |
+|-----|-------------|
+| [http://127.0.0.1:8080](http://127.0.0.1:8080) | Web UI |
+| [http://127.0.0.1:8000/](http://127.0.0.1:8000/) | API HTML index (browser) or JSON (curl) |
+| [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs) | Swagger UI (no external CDN) |
+| [http://127.0.0.1:8000/health](http://127.0.0.1:8000/health) | Health + DB status |
 
-On Windows (PowerShell), from the repo root:
+---
 
-```powershell
-cd C:\path\to\EVENT-HUB
-npm install
-```
+## Desktop (Electron) development
 
-### 2. Python backend
-
-```bash
-cd backend
-python -m venv .venv
-```
-
-Activate the virtual environment:
-
-- **Windows (PowerShell):** `.\.venv\Scripts\Activate.ps1`
-- **macOS / Linux:** `source .venv/bin/activate`
-
-Then install dependencies:
-
-```bash
-pip install -r requirements.txt
-```
-
-## Running the app
-
-Run these from the **repository root** unless noted.
-
-### Desktop (development)
-
-Starts the Vite dev server on **port 8080**, opens Electron at `http://127.0.0.1:8080`, and (when the app is not packaged) spawns **uvicorn** for FastAPI on **port 8000** if `backend/.venv` exists.
+From repo root (starts Vite on **8080** and may spawn the API if configured in your workflow):
 
 ```bash
 npm run dev
 ```
 
-### Web UI only (no Electron)
+Web UI only (no Electron):
 
 ```bash
 npm run dev -w frontend
 ```
 
-Then open the URL Vite prints (e.g. `http://localhost:8080`).
-
-### Backend only (optional)
-
-With the venv activated and working directory `backend/`:
-
-```bash
-uvicorn main:app --reload --host 127.0.0.1 --port 8000
-```
-
-### Production-style desktop (static UI)
-
-Builds the frontend for Electron (`vite build --mode electron`), then runs Electron loading `frontend/dist/`:
+Production-style desktop build:
 
 ```bash
 npm run build:desktop
 npm run start:desktop
 ```
 
-## API
+---
 
-- **Health:** `GET http://127.0.0.1:8000/health`
-- **Interactive docs:** `http://127.0.0.1:8000/docs` (when the server is running)
-
-CORS for local development is configured in `backend/main.py` (localhost / `127.0.0.1` dev origins).
-
-## Frontend scripts (workspace)
-
-From the repo root:
+## Frontend quality scripts
 
 ```bash
 npm run lint -w frontend
@@ -108,6 +146,20 @@ npm run build -w frontend
 npm test -w frontend
 ```
 
-## Distribution note
+---
 
-End-user installers that bundle Python are not covered here; this setup is aimed at **local development** (Node + a `backend/.venv` + Electron).
+## Documentation index
+
+| Document | Contents |
+|----------|----------|
+| [`planning/IMPLEMENTED_FEATURES.md`](planning/IMPLEMENTED_FEATURES.md) | **Technical reference — all implemented API/UI features** |
+| [`planning/IMPLEMENTATION_LOG.md`](planning/IMPLEMENTATION_LOG.md) | Decisions, changelog, reviewer checklist |
+| [`planning/LOCAL_POSTGRES_SETUP.md`](planning/LOCAL_POSTGRES_SETUP.md) | Postgres without Docker |
+| [`planning/DOCKER_SETUP.md`](planning/DOCKER_SETUP.md) | Docker Postgres + persistence |
+| [`CONTEXT.md`](CONTEXT.md) | Product context, routes, mock vs real |
+
+---
+
+## Security note (dev)
+
+`ALLOW_DEV_LOGIN` and a default `JWT_SECRET` are for **local development only**. Use strong secrets and disable dev login in any shared or production deployment.

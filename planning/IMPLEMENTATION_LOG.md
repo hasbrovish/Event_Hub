@@ -153,6 +153,11 @@ Aligned with `CONTEXT.md`, `MASTER_IMPLEMENTATION_PLAN.md`, `reference_docs/db_d
 - `docker-compose.env.example`, `scripts/docker-up.sh`, `planning/DOCKER_SETUP.md` for any machine; `run-backend.sh` waits via `docker compose exec … pg_isready`.
 - `scripts/run-all.sh`: Docker (if available) + migrate + start API (8000) and Vite (8080) when ports are free.
 
+### 2026-04-02 (README + technical features doc)
+
+- Root **`README.md`**: quick start, Postgres options (Docker vs local Mac), scripts, doc index, dev URLs.
+- **`planning/IMPLEMENTED_FEATURES.md`**: technical reference for all implemented API routes, frontend routes, stack, tooling, backlog pointer.
+
 ---
 
 *Append new dated sections below as features land.*
