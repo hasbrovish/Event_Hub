@@ -6,7 +6,8 @@ import { Calendar as CalIcon, ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useMyRegistrations } from "@/hooks/useRegistrations";
 import { mapListItemToEventData } from "@/lib/eventMap";
-import { getStoredToken } from "@/lib/api";
+import { apiDownloadBlob, getStoredToken } from "@/lib/api";
+import { useToast } from "@/hooks/use-toast";
 
 const daysOfWeek = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
@@ -27,6 +28,7 @@ function addMonths(d: Date, delta: number): Date {
 }
 
 export default function CalendarPage() {
+  const { toast } = useToast();
   const [viewMonth, setViewMonth] = useState(() => startOfMonth(new Date()));
   const hasToken = !!getStoredToken();
   const { data, isPending } = useMyRegistrations();
@@ -90,6 +92,33 @@ export default function CalendarPage() {
           </div>
           <Button variant="outline" size="sm" onClick={() => setViewMonth(startOfMonth(new Date()))}>
             Today
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={!hasToken}
+            onClick={() => {
+              void (async () => {
+                try {
+                  const blob = await apiDownloadBlob("/registrations/me/calendar.ics");
+                  const u = URL.createObjectURL(blob);
+                  const a = document.createElement("a");
+                  a.href = u;
+                  a.download = "my-events.ics";
+                  a.click();
+                  URL.revokeObjectURL(u);
+                  toast({ title: "Downloaded my-events.ics" });
+                } catch (e) {
+                  toast({
+                    title: "Export failed",
+                    description: e instanceof Error ? e.message : "",
+                    variant: "destructive",
+                  });
+                }
+              })();
+            }}
+          >
+            Export .ics
           </Button>
           <Button variant="default" size="sm" disabled>
             Month

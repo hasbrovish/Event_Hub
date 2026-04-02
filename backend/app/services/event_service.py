@@ -4,12 +4,19 @@ import uuid
 from datetime import datetime, timezone
 from typing import Sequence
 
-from sqlalchemy import delete, func, select
+from sqlalchemy import delete, func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
 from app.models import ApprovalRequest, Employee, Event, EventSession, Registration
-from app.schemas.event import EventCreate, EventDetailOut, EventListItem, EventUpdate, SessionOut
+from app.schemas.event import (
+    EventCreate,
+    EventDetailOut,
+    EventListItem,
+    EventStatsOut,
+    EventUpdate,
+    SessionOut,
+)
 
 EVENT_TYPE_TO_CATEGORY = {
     "Technology": "tech",
@@ -343,3 +350,79 @@ async def list_item_for_viewer(db: AsyncSession, ev: Event, viewer: Employee | N
     counts = await _registration_counts(db, [ev.id])
     my_regs = await _my_registrations(db, viewer.wid if viewer else None)
     return _to_list_item(ev, counts.get(ev.id, 0), my_regs)
+
+
+async def list_my_sessions_events(
+    db: AsyncSession,
+    user: Employee,
+    *,
+    ui_status: str | None,
+    page: int,
+    page_size: int,
+) -> tuple[list[EventListItem], int]:
+    speaker_event_ids = select(EventSession.event_id).where(EventSession.speaker_wid == user.wid)
+    stmt = (
+        select(Event)
+        .options(selectinload(Event.sessions))
+        .where(or_(Event.created_by == user.wid, Event.id.in_(speaker_event_ids)))
+        .order_by(Event.start_date.desc())
+    )
+    rows = (await db.execute(stmt)).scalars().unique().all()
+    filtered: list[Event] = []
+    for ev in rows:
+        uis = _ui_status(ev)
+        if ui_status and ui_status != "all" and uis != ui_status:
+            continue
+        filtered.append(ev)
+    total = len(filtered)
+    start = max(0, (page - 1) * page_size)
+    page_rows = filtered[start : start + page_size]
+    ids = [e.id for e in page_rows]
+    counts = await _registration_counts(db, ids)
+    my_regs = await _my_registrations(db, user.wid)
+    items = [_to_list_item(ev, counts.get(ev.id, 0), my_regs) for ev in page_rows]
+    return items, total
+
+
+async def get_dashboard_stats(db: AsyncSession, user: Employee | None) -> EventStatsOut:
+    now = datetime.now(timezone.utc)
+    active = (
+        await db.execute(select(func.count()).select_from(Event).where(Event.status == "Active"))
+    ).scalar_one()
+    upcoming = (
+        await db.execute(
+            select(func.count()).select_from(Event).where(
+                Event.status == "Active",
+                Event.start_date > now,
+            )
+        )
+    ).scalar_one()
+    live = (
+        await db.execute(
+            select(func.count()).select_from(Event).where(
+                Event.status == "Active",
+                Event.start_date <= now,
+                Event.end_date >= now,
+            )
+        )
+    ).scalar_one()
+    reg_me = 0
+    if user is not None:
+        reg_me = (
+            await db.execute(
+                select(func.count())
+                .select_from(Registration)
+                .join(Event, Registration.event_id == Event.id)
+                .where(
+                    Registration.employee_wid == user.wid,
+                    Registration.status.in_(["registered", "waitlisted"]),
+                    Event.status == "Active",
+                )
+            )
+        ).scalar_one()
+    return EventStatsOut(
+        upcoming=int(upcoming or 0),
+        live=int(live or 0),
+        registered_by_me=int(reg_me or 0),
+        total_active=int(active or 0),
+    )

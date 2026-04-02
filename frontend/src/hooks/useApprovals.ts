@@ -32,6 +32,7 @@ export function useReviewApprovalMutation() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["approvals"] });
       qc.invalidateQueries({ queryKey: ["events"] });
+      qc.invalidateQueries({ queryKey: ["admin", "logs"] });
     },
   });
 }

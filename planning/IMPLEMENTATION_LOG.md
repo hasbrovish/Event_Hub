@@ -64,7 +64,7 @@ Aligned with `CONTEXT.md`, `MASTER_IMPLEMENTATION_PLAN.md`, `reference_docs/db_d
 
 ### Not implemented yet (master plan backlog)
 
-- Refresh tokens, SSO exchange, Infosys API proxy, campaigns, notifications, admin routers, RBAC tests, Playwright E2E against API.
+- SSO exchange, Infosys API clients + Zscaler, persisted audit log, event reminder scheduler, digest batch jobs, RBAC integration tests, Playwright E2E, Electron native notifications + health-driven backend restart.
 
 ---
 
@@ -161,6 +161,16 @@ Aligned with `CONTEXT.md`, `MASTER_IMPLEMENTATION_PLAN.md`, `reference_docs/db_d
 ### 2026-04-02 (DB schema in technical doc)
 
 - **`planning/IMPLEMENTED_FEATURES.md` § 7**: full PostgreSQL schema from ORM — ER mermaid, per-table columns/FKs, API usage vs schema-only tables, migration note.
+
+---
+
+### 2026-04-02 (gaps + phases follow-up)
+
+- **RBAC:** Organizers are **scoped** to `group_admins` for approvals, event registration listing, and attendance marking (admins/platform_admin unchanged; unscoped events with `group_id` null remain visible to all organizers).
+- **Notifications:** Waitlist promotion + “new active event” fan-out (preference match, `immediate` frequency); UI **Notifications** page + header unread count.
+- **Frontend:** **Preferences**, **Campaigns**, **Admin** wired to API; **Event detail** `.ics` download; dev login includes **platform_admin** for config PATCH.
+- **Electron:** **Tray** with Show/Quit, **close-to-tray** (quit clears tray).
+- **Docs:** `IMPLEMENTED_FEATURES.md` §7.3 and `SYNTHESIS_AND_GAPS.md` §5 refreshed for accuracy.
 
 ---
 

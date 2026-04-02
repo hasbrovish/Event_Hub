@@ -10,6 +10,7 @@ export type EmployeeMe = {
 
 export type LoginResponse = {
   access_token: string;
+  refresh_token: string;
   token_type: string;
   user: EmployeeMe;
 };
@@ -98,4 +99,104 @@ export type ApprovalOutApi = {
   reviewed_at: string | null;
   requested_by: string;
   reviewed_by: string | null;
+};
+
+export type NotificationOutApi = {
+  id: number;
+  type: string | null;
+  title: string | null;
+  body: string | null;
+  is_read: boolean;
+  event_id: string | null;
+  created_at: string;
+};
+
+export type NotificationListResponse = {
+  items: NotificationOutApi[];
+  total: number;
+  page: number;
+  page_size: number;
+};
+
+export type UnreadCountResponse = { count: number };
+
+export type PreferenceOutApi = {
+  event_types: string[] | null;
+  interests: string[] | null;
+  notification_frequency: string;
+  notification_mechanisms: string[] | null;
+  notification_times: string[] | null;
+  notify_on_login: boolean;
+  followed_group_ids: number[] | null;
+};
+
+export type CampaignOutApi = {
+  id: number;
+  event_id: string;
+  created_by: string;
+  message: string;
+  teams_channel_ids: string[] | null;
+  viva_group_ids: string[] | null;
+  infyme_banner: boolean;
+  scheduled_at: string;
+  status: string;
+  posted_at: string | null;
+  failure_reason: string | null;
+  created_at: string;
+};
+
+export type CampaignListResponse = {
+  items: CampaignOutApi[];
+  total: number;
+  page: number;
+  page_size: number;
+};
+
+export type AdminStatsApi = {
+  total_users: number;
+  organizers: number;
+  events_this_month: number;
+  pending_approvals: number;
+};
+
+export type GroupOrganizerEntryApi = {
+  group_id: number;
+  group_name: string;
+  organizer_wids: string[];
+};
+
+export type AccessMatrixResponseApi = { items: GroupOrganizerEntryApi[] };
+
+export type ConfigEntryApi = { key: string; value: string };
+
+export type AdminConfigResponseApi = { items: ConfigEntryApi[] };
+
+export type AuditLogItemApi = {
+  id: number;
+  action: string;
+  detail: string | null;
+  actor_wid: string | null;
+  created_at: string;
+};
+
+export type AdminLogsResponseApi = { items: AuditLogItemApi[] };
+
+export type GroupOutApi = {
+  id: number;
+  name: string;
+  description: string | null;
+  org: string;
+  geo: string | null;
+  unit: string | null;
+  subunit: string | null;
+  location: string | null;
+  dl_emails: string[] | null;
+  is_active: boolean;
+};
+
+export type GroupListResponseApi = {
+  items: GroupOutApi[];
+  total: number;
+  page: number;
+  page_size: number;
 };

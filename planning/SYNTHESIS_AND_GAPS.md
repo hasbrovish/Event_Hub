@@ -75,14 +75,16 @@ This document consolidates findings from `CONTEXT.md`, `MASTER_IMPLEMENTATION_PL
 
 ## 5. Current codebase vs documentation
 
-| Area | Docs say | Typical repo state (per CONTEXT) |
+| Area | Docs say | Repo state (see `planning/IMPLEMENTED_FEATURES.md` §2 + §7) |
 | --- | --- | --- |
-| Backend | Full REST + DB | Minimal FastAPI, `/health` only |
-| Frontend | React Query + real APIs | Mock data, `RoleContext` |
-| Auth | SSO + JWT | Not implemented |
-| Electron | Tray, notifications, health | Shell + dev spawn; extensions in Phase 7 |
+| Backend | MASTER **52**-style catalog | **Most catalog routes exist** (refresh, stats, my-sessions, `.ics`, registrations list, attend, approvals list + my-requests, groups, campaigns, notifications, preferences, master-data stubs, integrations mocks, recommendations, admin). **Still missing:** real SSO, Infosys proxies, persisted audit logs, production Zscaler. |
+| Frontend | MASTER §5 migration | **Wired:** dashboard, detail (incl. ICS download), calendar, create, approvals, **notifications**, **preferences**, **campaigns**, **admin** panel, auth + unread badge. **Thin:** manage-events consolidation, digest scheduling UI. |
+| Auth | SSO + JWT | **Dev JWT + refresh**; **`/auth/login/sso` → 501**. |
+| `reference_docs/apis.json` | Corporate APIs | **Not proxied**; `/master-data/*` uses static dev payloads. |
+| `reference_docs/PS.md` | Full product | **Gaps:** governance persona enum, real Teams/Viva/InfyMe posting, SLM recommendations, background client behavior, performance monitoring. |
+| Electron | Phase 7 | **Tray + hide-on-close** added; **no** native notification bridge, idle detection, or backend health restart loop yet. |
 
-**Finding:** **MASTER_IMPLEMENTATION_PLAN Phase 1** is the correct wedge: app package layout, PostgreSQL + Alembic, auth router, `AuthContext`, `api.ts`—then Phase 2+.
+**Finding:** Core **phases 1–6** backend + primary UI surfaces are largely in place; remaining work is **enterprise integration**, **Electron hardening**, **digest/reminder jobs**, **audit persistence**, and **group governance** polish.
 
 ---
 

@@ -1,6 +1,7 @@
+import uuid
 from datetime import datetime
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, Field
 
 
 class SessionCreate(BaseModel):
@@ -8,28 +9,40 @@ class SessionCreate(BaseModel):
     topic_brief: str | None = None
     start_datetime: datetime
     duration_minutes: int = Field(..., ge=1, le=24 * 60)
-    speaker_name: str | None = Field(None, max_length=200)
-    speaker_title: str | None = Field(None, max_length=200)
+    speaker_name: str | None = None
+    speaker_title: str | None = None
+
+
+class SessionOut(BaseModel):
+    id: int
+    session_order: int
+    topic: str
+    topic_brief: str | None
+    start_datetime: datetime
+    duration_minutes: int
+    speaker_name: str | None
+    speaker_title: str | None
+    speaker_headshot_url: str | None
 
 
 class EventCreate(BaseModel):
     title: str = Field(..., min_length=1, max_length=300)
     description: str | None = None
-    event_type: str = Field(..., description="Technology|Health|Fun|Domain|Product|Others")
+    event_type: str = Field(..., max_length=50)
     tags: list[str] = Field(default_factory=list)
-    delivery_method: str = Field(default="Virtual")
+    delivery_method: str = Field(default="Virtual", max_length=50)
     start_date: datetime
     end_date: datetime
     venue_name: str | None = None
     event_url: str | None = None
     slots: int | None = Field(None, ge=1)
-    visibility: str = Field(default="org-wide")
+    visibility: str = Field(default="internal", max_length=50)
     group_id: int | None = None
     sessions: list[SessionCreate] = Field(default_factory=list)
 
 
 class EventUpdate(BaseModel):
-    title: str | None = Field(None, max_length=300)
+    title: str | None = Field(None, min_length=1, max_length=300)
     description: str | None = None
     event_type: str | None = None
     tags: list[str] | None = None
@@ -43,23 +56,13 @@ class EventUpdate(BaseModel):
     group_id: int | None = None
 
 
-class SessionOut(BaseModel):
-    model_config = ConfigDict(from_attributes=True)
-
-    id: int
-    session_order: int
-    topic: str
-    topic_brief: str | None
-    start_datetime: datetime
-    duration_minutes: int
-    speaker_name: str | None
-    speaker_title: str | None
-    speaker_headshot_url: str | None
+class SpeakerBlock(BaseModel):
+    name: str
+    title: str
+    avatar: str
 
 
 class EventListItem(BaseModel):
-    """Shape aligned with frontend EventCard / Dashboard (camelCase JSON)."""
-
     id: str
     title: str
     description: str
@@ -68,12 +71,12 @@ class EventListItem(BaseModel):
     duration: str
     category: str
     location: str
-    speaker: dict
+    speaker: SpeakerBlock
     attendees: int
     max_attendees: int
     status: str
     tags: list[str]
-    is_registered: bool = False
+    is_registered: bool
 
 
 class EventDetailOut(EventListItem):
@@ -82,8 +85,8 @@ class EventDetailOut(EventListItem):
     group_id: int | None
     created_by: str
     db_status: str
-    sessions: list[SessionOut] = Field(default_factory=list)
-    my_registration_status: str | None = None
+    sessions: list[SessionOut]
+    my_registration_status: str | None
 
 
 class EventListResponse(BaseModel):
@@ -91,6 +94,13 @@ class EventListResponse(BaseModel):
     total: int
     page: int
     page_size: int
+
+
+class EventStatsOut(BaseModel):
+    upcoming: int
+    live: int
+    registered_by_me: int
+    total_active: int
 
 
 class SubmitForApprovalBody(BaseModel):

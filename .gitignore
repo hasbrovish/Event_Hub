@@ -1,5 +1,6 @@
 backend/.venv/
 backend/.env
+backend/data/admin_config.json
 # Repo-root .env used by docker-compose (POSTGRES_PORT); copy from docker-compose.env.example
 .env
 frontend/.env

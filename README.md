@@ -4,7 +4,7 @@ Internal event discovery and governance platform: **React** UI (Vite, TypeScript
 
 Repository: [github.com/hasbrovish/Event_Hub](https://github.com/hasbrovish/Event_Hub)
 
-**Technical feature list (what is implemented):** [`planning/IMPLEMENTED_FEATURES.md`](planning/IMPLEMENTED_FEATURES.md)
+**Docs:** **[`TECHNICAL_REFERENCE.md`](TECHNICAL_REFERENCE.md)** — architecture summary, **12-phase alignment vs `MASTER_IMPLEMENTATION_PLAN.md`**, and consolidated gaps (enterprise SSO, Zscaler, desktop hardening, testing). **[`planning/MASTER_FINAL_PLAN.md`](planning/MASTER_FINAL_PLAN.md)** — gap closure toward PS **~100%**, integration seams, phased F0–F8. **[`planning/IMPLEMENTED_FEATURES.md`](planning/IMPLEMENTED_FEATURES.md)** — route-by-route and schema reference for what is implemented today.
 
 ---
 
@@ -152,8 +152,14 @@ npm test -w frontend
 
 | Document | Contents |
 |----------|----------|
-| [`planning/IMPLEMENTED_FEATURES.md`](planning/IMPLEMENTED_FEATURES.md) | **Technical reference — all implemented API/UI features** |
+| [`TECHNICAL_REFERENCE.md`](TECHNICAL_REFERENCE.md) | **Master plan gap analysis**, architecture, backlog themes, file map |
+| [`planning/MASTER_FINAL_PLAN.md`](planning/MASTER_FINAL_PLAN.md) | **PS ~100% roadmap**, Copilot integration index, F0–F8 phases |
+| [`planning/COPILOT_MASTER_PROMPTS.md`](planning/COPILOT_MASTER_PROMPTS.md) | **Copy-paste prompts** for Copilot on corporate laptops (F1–F8 + verification) |
+| [`MASTER_IMPLEMENTATION_PLAN.md`](MASTER_IMPLEMENTATION_PLAN.md) | Full phased blueprint (workflows, API catalog, testing, Zscaler, packaging) |
+| [`planning/IMPLEMENTED_FEATURES.md`](planning/IMPLEMENTED_FEATURES.md) | **Implemented** API routes, models, UI, deferred §6 |
+| [`planning/DESKTOP_APP_AND_INFOSYS_REMOTE_RUNBOOK.md`](planning/DESKTOP_APP_AND_INFOSYS_REMOTE_RUNBOOK.md) | Continuous desktop app, Infosys integration steps, remote deploy |
 | [`planning/IMPLEMENTATION_LOG.md`](planning/IMPLEMENTATION_LOG.md) | Decisions, changelog, reviewer checklist |
+| [`planning/SYNTHESIS_AND_GAPS.md`](planning/SYNTHESIS_AND_GAPS.md) | Short plan-vs-code synthesis |
 | [`planning/LOCAL_POSTGRES_SETUP.md`](planning/LOCAL_POSTGRES_SETUP.md) | Postgres without Docker |
 | [`planning/DOCKER_SETUP.md`](planning/DOCKER_SETUP.md) | Docker Postgres + persistence |
 | [`CONTEXT.md`](CONTEXT.md) | Product context, routes, mock vs real |

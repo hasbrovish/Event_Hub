@@ -1,3 +1,5 @@
+import asyncio
+from contextlib import asynccontextmanager
 from pathlib import Path
 
 from fastapi import FastAPI, Request
@@ -7,7 +9,23 @@ from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 
 from app.config import settings
-from app.routers import approvals, auth, events, health, registrations
+from app.routers import (
+    admin,
+    approvals,
+    auth,
+    campaigns,
+    events,
+    groups,
+    health,
+    integrations,
+    master_data,
+    notifications,
+    preferences,
+    recommendations,
+    registrations,
+)
+from app.tasks.campaign_scheduler import campaign_scheduler_loop
+from app.tasks.event_reminder import event_reminder_loop
 
 _ORIGINS = [
     "http://127.0.0.1:8080",
@@ -57,11 +75,30 @@ def _browser_wants_html(request: Request) -> bool:
     return first == "text/html"
 
 
+@asynccontextmanager
+async def _lifespan(_app: FastAPI):
+    tasks = [
+        asyncio.create_task(campaign_scheduler_loop()),
+        asyncio.create_task(event_reminder_loop()),
+    ]
+    try:
+        yield
+    finally:
+        for t in tasks:
+            t.cancel()
+        for t in tasks:
+            try:
+                await t
+            except asyncio.CancelledError:
+                pass
+
+
 def create_app() -> FastAPI:
     application = FastAPI(
         title=settings.app_name,
         docs_url=None,
         redoc_url=None,
+        lifespan=_lifespan,
     )
     application.add_middleware(
         CORSMiddleware,
@@ -117,6 +154,14 @@ def create_app() -> FastAPI:
     application.include_router(events.router)
     application.include_router(registrations.router)
     application.include_router(approvals.router)
+    application.include_router(groups.router)
+    application.include_router(campaigns.router)
+    application.include_router(notifications.router)
+    application.include_router(preferences.router)
+    application.include_router(master_data.router)
+    application.include_router(integrations.router)
+    application.include_router(recommendations.router)
+    application.include_router(admin.router)
     return application
 
 

@@ -10,6 +10,7 @@ import { useRegisterMutation, useUnregisterMutation } from "@/hooks/useRegistrat
 import { mapDetailToEventData } from "@/lib/eventMap";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
+import { apiDownloadBlob } from "@/lib/api";
 
 const categoryLabels: Record<string, string> = {
   tech: "Technology",
@@ -228,7 +229,33 @@ export default function EventDetail() {
                         : "Register now"}
                 </Button>
                 <div className="flex gap-2">
-                  <Button variant="outline" className="flex-1 gap-1" size="sm" disabled>
+                  <Button
+                    variant="outline"
+                    className="flex-1 gap-1"
+                    size="sm"
+                    disabled={!isAuthenticated || raw.db_status !== "Active"}
+                    onClick={() => {
+                      if (!id) return;
+                      void (async () => {
+                        try {
+                          const blob = await apiDownloadBlob(`/events/${id}/calendar.ics`);
+                          const u = URL.createObjectURL(blob);
+                          const a = document.createElement("a");
+                          a.href = u;
+                          a.download = `event-${id}.ics`;
+                          a.click();
+                          URL.revokeObjectURL(u);
+                          toast({ title: "Calendar file downloaded" });
+                        } catch (e) {
+                          toast({
+                            title: "Download failed",
+                            description: e instanceof Error ? e.message : "Error",
+                            variant: "destructive",
+                          });
+                        }
+                      })();
+                    }}
+                  >
                     <CalendarPlus className="h-3.5 w-3.5" /> Add to Calendar
                   </Button>
                   <Button variant="outline" className="flex-1" size="sm" asChild>

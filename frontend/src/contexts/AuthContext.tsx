@@ -8,13 +8,15 @@ import {
   type ReactNode,
 } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { apiFetch, getStoredToken, setStoredToken } from "@/lib/api";
+import { apiFetch, getStoredToken, setStoredRefresh, setStoredToken } from "@/lib/api";
 import type { EmployeeMe, LoginResponse } from "@/types/api";
 
 export type UserRole = "audience" | "speaker" | "organizer" | "admin";
 
 function mapRole(r: string): UserRole | null {
   if (r === "platform_admin") return "admin";
+  // Governance (PS stakeholder): campaign / comms surfaces — use organizer nav + campaigns
+  if (r === "governance") return "organizer";
   if (r === "audience" || r === "speaker" || r === "organizer" || r === "admin") return r;
   return null;
 }
@@ -49,6 +51,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (meQuery.isError) {
       setStoredToken(null);
+      setStoredRefresh(null);
       setToken(null);
     }
   }, [meQuery.isError]);
@@ -86,11 +89,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           email: "dev.user@example.com",
           first_name: "Dev",
           last_name: "User",
-          roles: ["audience", "speaker", "organizer", "admin"],
+          roles: ["audience", "speaker", "organizer", "admin", "platform_admin"],
         }),
       }),
     onSuccess: (data) => {
       setStoredToken(data.access_token);
+      setStoredRefresh(data.refresh_token);
       setToken(data.access_token);
       qc.invalidateQueries({ queryKey: ["auth", "me"] });
       qc.invalidateQueries({ queryKey: ["events"] });
@@ -103,6 +107,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const logout = useCallback(() => {
     setStoredToken(null);
+    setStoredRefresh(null);
     setToken(null);
     qc.removeQueries({ queryKey: ["auth", "me"] });
     qc.invalidateQueries({ queryKey: ["events"] });

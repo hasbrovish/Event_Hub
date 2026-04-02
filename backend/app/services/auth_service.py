@@ -12,7 +12,9 @@ from app.config import settings
 from app.models import Employee, EmployeeRole, Preference
 
 DEV_EMAIL_NAMESPACE = uuid.UUID("6ba7b811-9dad-11d1-80b4-00c04fd430c8")
-ALLOWED_ROLES = frozenset({"audience", "speaker", "organizer", "admin", "platform_admin"})
+ALLOWED_ROLES = frozenset(
+    {"audience", "speaker", "organizer", "admin", "platform_admin", "governance"}
+)
 
 
 def stable_wid_for_email(email: str) -> uuid.UUID:
@@ -25,6 +27,20 @@ def create_access_token(*, subject_wid: uuid.UUID, roles: list[str]) -> str:
     payload = {
         "sub": str(subject_wid),
         "roles": roles,
+        "typ": "access",
+        "iat": int(now.timestamp()),
+        "exp": int(expire.timestamp()),
+    }
+    return jwt.encode(payload, settings.jwt_secret, algorithm=settings.jwt_algorithm)
+
+
+def create_refresh_token(*, subject_wid: uuid.UUID, roles: list[str]) -> str:
+    now = datetime.now(timezone.utc)
+    expire = now + timedelta(days=settings.refresh_token_expire_days)
+    payload = {
+        "sub": str(subject_wid),
+        "roles": roles,
+        "typ": "refresh",
         "iat": int(now.timestamp()),
         "exp": int(expire.timestamp()),
     }
@@ -38,6 +54,21 @@ def decode_token(token: str) -> dict:
 def parse_bearer_sub(token: str) -> uuid.UUID | None:
     try:
         data = decode_token(token)
+        if data.get("typ") == "refresh":
+            return None
+        sub = data.get("sub")
+        if not sub:
+            return None
+        return uuid.UUID(str(sub))
+    except (JWTError, ValueError):
+        return None
+
+
+def parse_refresh_sub(token: str) -> uuid.UUID | None:
+    try:
+        data = decode_token(token)
+        if data.get("typ") != "refresh":
+            return None
         sub = data.get("sub")
         if not sub:
             return None

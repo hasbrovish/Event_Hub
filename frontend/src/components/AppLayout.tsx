@@ -1,7 +1,9 @@
 import { ReactNode } from "react";
+import { Link } from "react-router-dom";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
 import { useAuth } from "@/contexts/AuthContext";
+import { useUnreadNotificationCount } from "@/hooks/useNotifications";
 import { Bell, HelpCircle, Mic, Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -11,6 +13,8 @@ import { BackendStatusPill } from "@/components/BackendStatusPill";
 
 function AppLayoutInner({ children }: { children: ReactNode }) {
   const { user, isAuthenticated, loginDev, loginPending, logout } = useAuth();
+  const { data: unread } = useUnreadNotificationCount(isAuthenticated);
+  const unreadN = unread?.count ?? 0;
   const initials =
     user && (user.first_name || user.last_name)
       ? `${user.first_name?.[0] ?? ""}${user.last_name?.[0] ?? ""}`.toUpperCase() || "?"
@@ -105,12 +109,20 @@ function AppLayoutInner({ children }: { children: ReactNode }) {
                 >
                   <HelpCircle className="h-5 w-5" />
                 </Button>
-                <Button variant="ghost" size="icon" className="relative text-white hover:bg-white/15 h-9 w-9">
-                  <Bell className="h-5 w-5" />
-                  <span
-                    className="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-infy-gold ring-2 ring-infy-header"
-                    aria-hidden
-                  />
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="relative text-white hover:bg-white/15 h-9 w-9"
+                  asChild
+                >
+                  <Link to="/notifications" aria-label="Notifications">
+                    <Bell className="h-5 w-5" />
+                    {unreadN > 0 && (
+                      <span className="absolute -top-0.5 -right-0.5 min-w-[1.1rem] h-[1.1rem] px-1 rounded-full bg-infy-gold text-[10px] font-bold text-infy-header flex items-center justify-center ring-2 ring-infy-header">
+                        {unreadN > 9 ? "9+" : unreadN}
+                      </span>
+                    )}
+                  </Link>
                 </Button>
                 <Avatar className="h-9 w-9 cursor-pointer ring-2 ring-white/30">
                   <AvatarFallback className="bg-white/90 text-infy-purple text-xs font-semibold">

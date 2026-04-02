@@ -1,17 +1,53 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database import get_db
 from app.dependencies import get_current_user, require_roles
 from app.models import Employee
-from app.schemas.approval import ApprovalOut, ApprovalPendingResponse, ApprovalReviewBody
+from app.schemas.approval import (
+    ApprovalListResponse,
+    ApprovalOut,
+    ApprovalPendingResponse,
+    ApprovalReviewBody,
+    MyApprovalRequestsResponse,
+)
 from app.services import approval_service
 
 router = APIRouter(prefix="/approvals", tags=["approvals"])
 
 ReviewerPlus = Annotated[Employee, Depends(require_roles("organizer", "admin", "platform_admin"))]
+SpeakerPlus = Annotated[Employee, Depends(require_roles("speaker", "organizer", "admin", "platform_admin"))]
+
+
+@router.get("", response_model=ApprovalListResponse)
+async def list_approvals(
+    db: Annotated[AsyncSession, Depends(get_db)],
+    user: ReviewerPlus,
+    approval_status: str | None = Query(None, alias="status"),
+    group_id: int | None = Query(None),
+    page: int = Query(1, ge=1),
+    page_size: int = Query(20, ge=1, le=100),
+) -> ApprovalListResponse:
+    items, total = await approval_service.list_approval_requests(
+        db,
+        user,
+        approval_status=approval_status,
+        group_id=group_id,
+        page=page,
+        page_size=page_size,
+    )
+    return ApprovalListResponse(items=items, total=total, page=page, page_size=page_size)
+
+
+@router.get("/my-requests", response_model=MyApprovalRequestsResponse)
+async def my_approval_requests(
+    db: Annotated[AsyncSession, Depends(get_db)],
+    user: SpeakerPlus,
+) -> MyApprovalRequestsResponse:
+    items = await approval_service.list_my_approval_requests(db, user)
+    return MyApprovalRequestsResponse(items=items)
 
 
 @router.get("/pending", response_model=ApprovalPendingResponse)
@@ -34,8 +70,14 @@ async def review(
         out = await approval_service.review_approval(
             db, approval_id, user, body.decision, body.review_comment
         )
-    except PermissionError:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not allowed to review")
+    except PermissionError as e:
+        key = str(e) if e.args else ""
+        detail = (
+            "You are not an organizer for this event's group"
+            if key == "not_group_reviewer"
+            else "Not allowed to review"
+        )
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=detail)
     except ValueError as e:
         msg = str(e)
         if msg == "not_pending":
