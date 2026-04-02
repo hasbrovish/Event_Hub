@@ -135,6 +135,12 @@ Aligned with `CONTEXT.md`, `MASTER_IMPLEMENTATION_PLAN.md`, `reference_docs/db_d
 - Frontend: `/approvals` **Pending approvals** page (`useApprovals`), sidebar links for organizer + admin roles.
 - `Manage Events` tabs remain mock data; real review queue is `/approvals` until that page is consolidated.
 
+### 2026-04-02 (offline Swagger /docs)
+
+- `/docs` served **local** `swagger-ui-bundle.js` + `swagger-ui.css` under `backend/static/swagger-ui/` (no jsDelivr CDN — fixes blank white `/docs` behind firewalls).
+- Browser `GET /` with `Accept: text/html` returns a small HTML index; `*/*` or API clients still get JSON.
+- `scripts/fetch-swagger-ui.sh` to refresh vendored assets.
+
 ### 2026-04-02 (Docker persistence & portability)
 
 - `docker-compose.yml`: `restart: unless-stopped`, configurable `POSTGRES_PORT`, `start_period` on healthcheck, comments on volume persistence.
