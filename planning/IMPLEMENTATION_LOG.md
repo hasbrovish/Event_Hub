@@ -100,13 +100,14 @@ Aligned with `CONTEXT.md`, `MASTER_IMPLEMENTATION_PLAN.md`, `reference_docs/db_d
 
 1. **Docker + persistence:** see `planning/DOCKER_SETUP.md`. Data lives in volume `eventhub_pg_data` until `docker compose down -v`.
 2. **DB only:** `./scripts/docker-up.sh` (requires Docker daemon running).
-3. **One-shot API + DB:** `./scripts/run-backend.sh` — `docker compose up -d postgres`, waits via `docker compose exec … pg_isready`, venv, `alembic upgrade`, uvicorn on **8000**.
-4. Or manually: `docker compose up -d postgres` (from repo root).
-5. `cd backend && pip install -r requirements.txt && alembic upgrade head`
-6. Optional: `python -m scripts.seed_demo_events`
-7. From **`backend/`**: `uvicorn main:app --reload --host 127.0.0.1 --port 8000` (must be this `main:app`, not a stub).
-8. Open [http://127.0.0.1:8000/](http://127.0.0.1:8000/) — JSON; [http://127.0.0.1:8000/health](http://127.0.0.1:8000/health) must show `"db":"connected"` for events/login to work.
-9. `cd frontend && npm run dev` → **Sign in (dev)** → browse events.
+3. **Full stack (DB + migrate + API + UI):** `./scripts/run-all.sh` from repo root (starts missing pieces; skips ports already in use).
+4. **One-shot API + DB:** `./scripts/run-backend.sh` — `docker compose up -d postgres`, waits via `docker compose exec … pg_isready`, venv, `alembic upgrade`, uvicorn on **8000**.
+5. Or manually: `docker compose up -d postgres` (from repo root).
+6. `cd backend && pip install -r requirements.txt && alembic upgrade head`
+7. Optional: `python -m scripts.seed_demo_events`
+8. From **`backend/`**: `uvicorn main:app --reload --host 127.0.0.1 --port 8000` (must be this `main:app`, not a stub).
+9. Open [http://127.0.0.1:8000/](http://127.0.0.1:8000/) — JSON; [http://127.0.0.1:8000/health](http://127.0.0.1:8000/health) must show `"db":"connected"` for events/login to work.
+10. `cd frontend && npm run dev` → **Sign in (dev)** → browse events.
 
 ---
 
@@ -138,6 +139,7 @@ Aligned with `CONTEXT.md`, `MASTER_IMPLEMENTATION_PLAN.md`, `reference_docs/db_d
 
 - `docker-compose.yml`: `restart: unless-stopped`, configurable `POSTGRES_PORT`, `start_period` on healthcheck, comments on volume persistence.
 - `docker-compose.env.example`, `scripts/docker-up.sh`, `planning/DOCKER_SETUP.md` for any machine; `run-backend.sh` waits via `docker compose exec … pg_isready`.
+- `scripts/run-all.sh`: Docker (if available) + migrate + start API (8000) and Vite (8080) when ports are free.
 
 ---
 

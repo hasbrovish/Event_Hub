@@ -41,6 +41,12 @@ Or run API + DB in one step from repo root:
 ./scripts/run-backend.sh
 ```
 
+**API + frontend together** (after `npm install` in `frontend/` once):
+
+```bash
+./scripts/run-all.sh
+```
+
 ## Another developer / another laptop
 
 1. Clone the same repo (any path).
