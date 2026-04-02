@@ -75,3 +75,27 @@ export type MyRegistrationEntryApi = {
 export type MyRegistrationsResponse = {
   items: MyRegistrationEntryApi[];
 };
+
+export type ApprovalPendingItemApi = {
+  approval_id: number;
+  event_id: string;
+  event_title: string;
+  status: string;
+  requested_at: string;
+};
+
+export type ApprovalsPendingResponse = {
+  items: ApprovalPendingItemApi[];
+};
+
+export type ApprovalOutApi = {
+  id: number;
+  event_id: string;
+  status: string;
+  request_note: string | null;
+  review_comment: string | null;
+  requested_at: string;
+  reviewed_at: string | null;
+  requested_by: string;
+  reviewed_by: string | null;
+};

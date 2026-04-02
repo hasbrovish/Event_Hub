@@ -131,7 +131,8 @@ Event_Hub/
 | `/create-event` | Propose new event (multi-session form) | Speaker |
 | `/preferences` | Interest & notification preferences | All |
 | `/notifications` | Notification center | All |
-| `/manage-events` | Approve/reject/manage events | Organizer |
+| `/manage-events` | Event management (tabs partly mock) | Organizer |
+| `/approvals` | Pending approval queue (`GET /approvals/pending`, review actions) | Organizer, Admin |
 | `/my-sessions` | Speaker's sessions & approval status | Speaker |
 | `/campaigns` | Schedule MS Teams / Viva Engage campaigns | Organizer |
 | `/admin/access` `/admin/logs` `/admin/config` | Admin panel | Admin |
@@ -221,6 +222,7 @@ Cache unit/sub-unit responses with 1-hour TTL.
 | User profile | **API** `/auth/me` after dev sign-in; initials in header |
 | Role switching | Real roles from `/auth/me`; sidebar shows only assigned roles |
 | Registration | **API** `POST/DELETE /events/{id}/register`, `GET /registrations/me` |
+| Approval queue (review) | **API** `GET /approvals/pending`, `PATCH /approvals/:id` (UI: `/approvals`) |
 | Notifications | Mock |
 | Campaigns | Mock |
 | Admin data | Mock |

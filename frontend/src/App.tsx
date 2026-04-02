@@ -12,6 +12,7 @@ import CreateEvent from "./pages/CreateEvent";
 import Preferences from "./pages/Preferences";
 import Notifications from "./pages/Notifications";
 import ManageEvents from "./pages/ManageEvents";
+import PendingApprovals from "./pages/PendingApprovals";
 import MySessions from "./pages/MySessions";
 import Campaigns from "./pages/Campaigns";
 import AdminPanel from "./pages/AdminPanel";
@@ -37,6 +38,7 @@ const App = () => (
               <Route path="/preferences" element={<Preferences />} />
               <Route path="/notifications" element={<Notifications />} />
               <Route path="/manage-events" element={<ManageEvents />} />
+              <Route path="/approvals" element={<PendingApprovals />} />
               <Route path="/my-sessions" element={<MySessions />} />
               <Route path="/campaigns" element={<Campaigns />} />
               <Route path="/admin/access" element={<AdminPanel />} />

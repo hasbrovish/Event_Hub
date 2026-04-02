@@ -74,15 +74,17 @@ Aligned with `CONTEXT.md`, `MASTER_IMPLEMENTATION_PLAN.md`, `reference_docs/db_d
 | --- | --- |
 | `src/contexts/AuthContext.tsx` | JWT storage (`localStorage`), `/auth/me`, dev login mutation, `useRole` shim + `RoleProvider` alias. |
 | `src/lib/api.ts` | Bearer injection, 204 handling, token helpers. |
-| `src/types/api.ts` | API DTOs (snake_case). |
+| `src/types/api.ts` | API DTOs (snake_case), incl. registrations + approvals. |
 | `src/lib/eventMap.ts` | Maps API → existing `EventData` for cards. |
 | `src/hooks/useEvents.ts` | `GET /events`, `GET /events/{id}`. |
 | `src/hooks/useRegistrations.ts` | `GET /registrations/me`, register / unregister mutations + query invalidation. |
+| `src/hooks/useApprovals.ts` | `GET /approvals/pending`, `PATCH /approvals/{id}` + invalidation. |
+| `src/pages/PendingApprovals.tsx` | Reviewer queue: approve / reject / request changes (dialogs + toasts). |
 | `src/components/EventCard.tsx` | Register from card (auth + toast). |
 | `src/pages/CalendarPage.tsx` | Month navigation; grid + sidebar from `GET /registrations/me`. |
-| `src/App.tsx` | Wraps tree with `AuthProvider`. |
+| `src/App.tsx` | `AuthProvider` + routes including `/approvals`. |
 | `src/components/AppLayout.tsx` | Dev sign-in / sign-out, initials from `/auth/me`. |
-| `src/components/AppSidebar.tsx` | Role dropdown filtered by `availableRoles`. |
+| `src/components/AppSidebar.tsx` | Role dropdown; organizer + admin **Pending approvals** → `/approvals`. |
 | `src/pages/Dashboard.tsx` | Live data + empty state + seed hint. |
 | `src/pages/EventDetail.tsx` | Live detail + sessions; register/cancel/leave waitlist; calendar export still stubbed. |
 | `src/pages/CreateEvent.tsx` | `POST /events` + optional `submit`. |
@@ -122,6 +124,11 @@ Aligned with `CONTEXT.md`, `MASTER_IMPLEMENTATION_PLAN.md`, `reference_docs/db_d
 
 - `approval_service` + `PATCH /approvals/{id}`; `GET /approvals/pending` for reviewers.
 - Re-submit after **modification requested** reopens the same `approval_requests` row instead of inserting a duplicate.
+
+### 2026-04-02 (approvals UI)
+
+- Frontend: `/approvals` **Pending approvals** page (`useApprovals`), sidebar links for organizer + admin roles.
+- `Manage Events` tabs remain mock data; real review queue is `/approvals` until that page is consolidated.
 
 ---
 

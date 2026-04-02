@@ -9,6 +9,7 @@ import {
   BarChart3,
   Bell,
   ChevronDown,
+  ClipboardList,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useAuth, type UserRole } from "@/contexts/AuthContext";
@@ -63,6 +64,7 @@ const speakerItems = [
 const organizerItems = [
   { title: "Dashboard", url: "/", icon: Home },
   { title: "Manage Events", url: "/manage-events", icon: Settings },
+  { title: "Pending approvals", url: "/approvals", icon: ClipboardList },
   { title: "Campaigns", url: "/campaigns", icon: BarChart3 },
   { title: "My Calendar", url: "/calendar", icon: Calendar },
 ];
@@ -70,6 +72,7 @@ const organizerItems = [
 const adminItems = [
   { title: "Dashboard", url: "/", icon: Home },
   { title: "Access Matrix", url: "/admin/access", icon: Shield },
+  { title: "Pending approvals", url: "/approvals", icon: ClipboardList },
   { title: "All Events", url: "/manage-events", icon: Calendar },
   { title: "System Logs", url: "/admin/logs", icon: BarChart3 },
   { title: "App Config", url: "/admin/config", icon: Settings },
