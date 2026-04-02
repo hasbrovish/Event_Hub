@@ -98,13 +98,15 @@ Aligned with `CONTEXT.md`, `MASTER_IMPLEMENTATION_PLAN.md`, `reference_docs/db_d
 
 ## 4. How to run (reviewer checklist)
 
-1. **One-shot (from repo root):** `./scripts/run-backend.sh` — brings up Docker Postgres if `docker` exists, installs venv deps, copies `.env.example` → `.env` if missing, `alembic upgrade head`, then uvicorn on **8000**.
-2. Or manually: `docker compose up -d` (Postgres).
-3. `cd backend && pip install -r requirements.txt && alembic upgrade head`
-4. Optional: `python -m scripts.seed_demo_events`
-5. From **`backend/`**: `uvicorn main:app --reload --host 127.0.0.1 --port 8000` (must be this `main:app`, not a stub).
-6. Open [http://127.0.0.1:8000/](http://127.0.0.1:8000/) — should JSON (not 404); [http://127.0.0.1:8000/health](http://127.0.0.1:8000/health) must show `"db":"connected"` for events/login to work.
-7. `cd frontend && npm run dev` → **Sign in (dev)** → browse events.
+1. **Docker + persistence:** see `planning/DOCKER_SETUP.md`. Data lives in volume `eventhub_pg_data` until `docker compose down -v`.
+2. **DB only:** `./scripts/docker-up.sh` (requires Docker daemon running).
+3. **One-shot API + DB:** `./scripts/run-backend.sh` — `docker compose up -d postgres`, waits via `docker compose exec … pg_isready`, venv, `alembic upgrade`, uvicorn on **8000**.
+4. Or manually: `docker compose up -d postgres` (from repo root).
+5. `cd backend && pip install -r requirements.txt && alembic upgrade head`
+6. Optional: `python -m scripts.seed_demo_events`
+7. From **`backend/`**: `uvicorn main:app --reload --host 127.0.0.1 --port 8000` (must be this `main:app`, not a stub).
+8. Open [http://127.0.0.1:8000/](http://127.0.0.1:8000/) — JSON; [http://127.0.0.1:8000/health](http://127.0.0.1:8000/health) must show `"db":"connected"` for events/login to work.
+9. `cd frontend && npm run dev` → **Sign in (dev)** → browse events.
 
 ---
 
@@ -131,6 +133,11 @@ Aligned with `CONTEXT.md`, `MASTER_IMPLEMENTATION_PLAN.md`, `reference_docs/db_d
 
 - Frontend: `/approvals` **Pending approvals** page (`useApprovals`), sidebar links for organizer + admin roles.
 - `Manage Events` tabs remain mock data; real review queue is `/approvals` until that page is consolidated.
+
+### 2026-04-02 (Docker persistence & portability)
+
+- `docker-compose.yml`: `restart: unless-stopped`, configurable `POSTGRES_PORT`, `start_period` on healthcheck, comments on volume persistence.
+- `docker-compose.env.example`, `scripts/docker-up.sh`, `planning/DOCKER_SETUP.md` for any machine; `run-backend.sh` waits via `docker compose exec … pg_isready`.
 
 ---
 

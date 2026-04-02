@@ -4,17 +4,19 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT"
 
-if command -v docker >/dev/null 2>&1; then
-  docker compose up -d
-  echo "Postgres: waiting for port 5432…"
-  for _ in 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15; do
-    if command -v pg_isready >/dev/null 2>&1 && pg_isready -h 127.0.0.1 -p 5432 -q 2>/dev/null; then
+if command -v docker >/dev/null 2>&1 && docker info >/dev/null 2>&1; then
+  docker compose up -d postgres
+  echo "Postgres: waiting for container health…"
+  for _ in $(seq 1 60); do
+    if docker compose exec -T postgres pg_isready -U eventhub -d eventhub >/dev/null 2>&1; then
       break
     fi
     sleep 1
   done
 else
-  echo "Warning: docker not found. Ensure PostgreSQL is running on 127.0.0.1:5432 (user/db: eventhub) or set DATABASE_URL in backend/.env"
+  echo "Warning: Docker not installed or daemon not running."
+  echo "  Install/start Docker Desktop, or run: ./scripts/docker-up.sh"
+  echo "  Or point backend/.env DATABASE_URL at any Postgres on 127.0.0.1:5432 (user/db: eventhub)."
 fi
 
 cd "$ROOT/backend"
