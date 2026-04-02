@@ -220,7 +220,7 @@ Cache unit/sub-unit responses with 1-hour TTL.
 | Event listing | **API** `GET /events` (seed via `python -m scripts.seed_demo_events`) |
 | User profile | **API** `/auth/me` after dev sign-in; initials in header |
 | Role switching | Real roles from `/auth/me`; sidebar shows only assigned roles |
-| Registration | Mock (no API) |
+| Registration | **API** `POST/DELETE /events/{id}/register`, `GET /registrations/me` |
 | Notifications | Mock |
 | Campaigns | Mock |
 | Admin data | Mock |

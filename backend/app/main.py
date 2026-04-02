@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import settings
-from app.routers import auth, events, health
+from app.routers import auth, events, health, registrations
 
 _ORIGINS = [
     "http://127.0.0.1:8080",
@@ -24,6 +24,7 @@ def create_app() -> FastAPI:
     application.include_router(health.router)
     application.include_router(auth.router)
     application.include_router(events.router)
+    application.include_router(registrations.router)
     return application
 
 

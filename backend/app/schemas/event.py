@@ -83,6 +83,7 @@ class EventDetailOut(EventListItem):
     created_by: str
     db_status: str
     sessions: list[SessionOut] = Field(default_factory=list)
+    my_registration_status: str | None = None
 
 
 class EventListResponse(BaseModel):

@@ -50,6 +50,7 @@ export type EventDetailApi = EventListItemApi & {
   created_by: string;
   db_status: string;
   sessions: SessionOutApi[];
+  my_registration_status: string | null;
 };
 
 export type EventListResponse = {
@@ -57,4 +58,20 @@ export type EventListResponse = {
   total: number;
   page: number;
   page_size: number;
+};
+
+export type RegistrationActionResponse = {
+  registration_id: number | null;
+  registration_status: string;
+  detail?: string | null;
+};
+
+export type MyRegistrationEntryApi = {
+  registration_id: number;
+  registration_status: string;
+  event: EventListItemApi;
+};
+
+export type MyRegistrationsResponse = {
+  items: MyRegistrationEntryApi[];
 };

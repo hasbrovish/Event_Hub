@@ -6,7 +6,10 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { ArrowLeft, Calendar, Clock, MapPin, Users, Share2, CalendarPlus, Linkedin } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { useEventDetail } from "@/hooks/useEvents";
+import { useRegisterMutation, useUnregisterMutation } from "@/hooks/useRegistrations";
 import { mapDetailToEventData } from "@/lib/eventMap";
+import { useAuth } from "@/contexts/AuthContext";
+import { useToast } from "@/hooks/use-toast";
 
 const categoryLabels: Record<string, string> = {
   tech: "Technology",
@@ -27,7 +30,11 @@ const categoryStyles: Record<string, string> = {
 export default function EventDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { data: raw, isPending, isError } = useEventDetail(id);
+  const { toast } = useToast();
+  const { isAuthenticated } = useAuth();
+  const { data: raw, isPending, isError, refetch } = useEventDetail(id);
+  const registerMut = useRegisterMutation();
+  const unregisterMut = useUnregisterMutation();
 
   const event = raw ? mapDetailToEventData(raw) : null;
 
@@ -162,8 +169,63 @@ export default function EventDetail() {
               <Separator />
 
               <div className="space-y-2">
-                <Button className="w-full rounded-full font-semibold shadow-sm" size="lg" disabled>
-                  {event.isRegistered ? "Registered ✓" : "Register now (API next phase)"}
+                {raw.my_registration_status === "waitlisted" && (
+                  <p className="text-xs text-amber-700 font-medium">You are on the waitlist.</p>
+                )}
+                <Button
+                  className="w-full rounded-full font-semibold shadow-sm"
+                  size="lg"
+                  disabled={
+                    !isAuthenticated ||
+                    registerMut.isPending ||
+                    unregisterMut.isPending ||
+                    raw.db_status !== "Active"
+                  }
+                  onClick={() => {
+                    if (!id) return;
+                    if (event.isRegistered) {
+                      unregisterMut.mutate(id, {
+                        onSuccess: () => {
+                          toast({ title: "Registration cancelled" });
+                          void refetch();
+                        },
+                        onError: (err) =>
+                          toast({
+                            title: "Could not cancel",
+                            description: err instanceof Error ? err.message : "Error",
+                            variant: "destructive",
+                          }),
+                      });
+                    } else {
+                      registerMut.mutate(id, {
+                        onSuccess: (res) => {
+                          toast({
+                            title:
+                              res.registration_status === "waitlisted"
+                                ? "You are on the waitlist"
+                                : "You are registered",
+                          });
+                          void refetch();
+                        },
+                        onError: (err) =>
+                          toast({
+                            title: "Could not register",
+                            description: err instanceof Error ? err.message : "Error",
+                            variant: "destructive",
+                          }),
+                      });
+                    }
+                  }}
+                >
+                  {!isAuthenticated
+                    ? "Sign in to register"
+                    : raw.db_status !== "Active"
+                      ? "Registration closed"
+                      : event.isRegistered
+                        ? raw.my_registration_status === "waitlisted"
+                          ? "Leave waitlist"
+                          : "Cancel registration"
+                        : "Register now"}
                 </Button>
                 <div className="flex gap-2">
                   <Button variant="outline" className="flex-1 gap-1" size="sm" disabled>

@@ -4,6 +4,9 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Calendar, Clock, MapPin, Users } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
+import { useToast } from "@/hooks/use-toast";
+import { useRegisterMutation } from "@/hooks/useRegistrations";
 
 const categoryStyles: Record<string, string> = {
   tech: "event-badge-tech",
@@ -23,6 +26,9 @@ const categoryLabels: Record<string, string> = {
 
 export function EventCard({ event }: { event: EventData }) {
   const navigate = useNavigate();
+  const { toast } = useToast();
+  const { isAuthenticated } = useAuth();
+  const registerMut = useRegisterMutation();
   const fillPercent = Math.round((event.attendees / event.maxAttendees) * 100);
 
   return (
@@ -96,11 +102,35 @@ export function EventCard({ event }: { event: EventData }) {
             size="sm"
             variant={event.isRegistered ? "outline" : "default"}
             className="h-8 rounded-full px-4 text-xs font-semibold shrink-0 border-primary/30"
+            disabled={registerMut.isPending}
             onClick={(e) => {
               e.stopPropagation();
+              if (event.isRegistered) {
+                navigate(`/event/${event.id}`);
+                return;
+              }
+              if (!isAuthenticated) {
+                toast({ title: "Sign in to register", variant: "destructive" });
+                return;
+              }
+              registerMut.mutate(event.id, {
+                onSuccess: (res) =>
+                  toast({
+                    title:
+                      res.registration_status === "waitlisted"
+                        ? "You are on the waitlist"
+                        : "You are registered",
+                  }),
+                onError: (err) =>
+                  toast({
+                    title: "Could not register",
+                    description: err instanceof Error ? err.message : "Error",
+                    variant: "destructive",
+                  }),
+              });
             }}
           >
-            {event.isRegistered ? "View details" : "Register"}
+            {event.isRegistered ? "View details" : registerMut.isPending ? "…" : "Register"}
           </Button>
         </div>
       </CardContent>

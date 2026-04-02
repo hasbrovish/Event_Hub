@@ -32,11 +32,14 @@ Aligned with `CONTEXT.md`, `MASTER_IMPLEMENTATION_PLAN.md`, `reference_docs/db_d
 | DB session | `app/database.py` | `get_db` now commits on success / rolls back on error. |
 | Auth deps | `app/dependencies.py` | `HTTPBearer`, `get_current_user`, `require_roles`. |
 | Auth service | `app/services/auth_service.py` | JWT create/decode, dev employee upsert, default `Preference` row. |
-| Events service | `app/services/event_service.py` | List/detail DTOs, create/update/delete, submit → `ApprovalRequest`, registration counts. |
+| Events service | `app/services/event_service.py` | List/detail DTOs, create/update/delete, submit → `ApprovalRequest`, registration counts, `my_registration_status` on detail. |
+| Registrations service | `app/services/registration_service.py` | Register (slots vs waitlist, re-register from `cancelled`), cancel + waitlist promote, `list_my_registrations`. |
+| Registrations router | `app/routers/registrations.py` | `GET /registrations/me`. |
+| Schemas | `app/schemas/registration.py` | Registration action + my-registrations DTOs. |
 | Schemas | `app/schemas/auth.py`, `app/schemas/event.py` | Login, me, CRUD + list/detail shapes. |
 | Routers | `app/routers/auth.py` | `POST /auth/login`, `POST /auth/login/sso` (501), `GET /auth/me`. |
-| Routers | `app/routers/events.py` | Full CRUD subset + `POST /events/{id}/submit`. |
-| App | `app/main.py` | Registers `auth` + `events`. |
+| Routers | `app/routers/events.py` | Full CRUD subset + submit + `POST`/`DELETE /events/{id}/register`. |
+| App | `app/main.py` | Registers `auth` + `events` + `registrations`. |
 | Entry | `main.py` | Still `uvicorn main:app`. |
 | Deps | `requirements.txt` | `python-jose[cryptography]`, `email-validator`. |
 | Env template | `.env.example` | DB URLs + JWT + `ALLOW_DEV_LOGIN`. |
@@ -53,10 +56,12 @@ Aligned with `CONTEXT.md`, `MASTER_IMPLEMENTATION_PLAN.md`, `reference_docs/db_d
 - `POST /events` — requires role in `speaker|organizer|admin|platform_admin`
 - `PATCH /events/{id}`, `DELETE /events/{id}` (draft-only delete)
 - `POST /events/{id}/submit` — Draft → Pending Approval + approval row
+- `POST /events/{id}/register`, `DELETE /events/{id}/register` — register / cancel (waitlist promote on seated cancel)
+- `GET /registrations/me` — current user’s registered + waitlisted events as `EventListItem`
 
 ### Not implemented yet (master plan backlog)
 
-- Refresh tokens, SSO exchange, Infosys API proxy, registrations, campaigns, notifications, admin routers, RBAC tests, Playwright E2E against API.
+- Refresh tokens, SSO exchange, Infosys API proxy, campaigns, notifications, admin routers, RBAC tests, Playwright E2E against API.
 
 ---
 
@@ -69,11 +74,14 @@ Aligned with `CONTEXT.md`, `MASTER_IMPLEMENTATION_PLAN.md`, `reference_docs/db_d
 | `src/types/api.ts` | API DTOs (snake_case). |
 | `src/lib/eventMap.ts` | Maps API → existing `EventData` for cards. |
 | `src/hooks/useEvents.ts` | `GET /events`, `GET /events/{id}`. |
+| `src/hooks/useRegistrations.ts` | `GET /registrations/me`, register / unregister mutations + query invalidation. |
+| `src/components/EventCard.tsx` | Register from card (auth + toast). |
+| `src/pages/CalendarPage.tsx` | Month navigation; grid + sidebar from `GET /registrations/me`. |
 | `src/App.tsx` | Wraps tree with `AuthProvider`. |
 | `src/components/AppLayout.tsx` | Dev sign-in / sign-out, initials from `/auth/me`. |
 | `src/components/AppSidebar.tsx` | Role dropdown filtered by `availableRoles`. |
 | `src/pages/Dashboard.tsx` | Live data + empty state + seed hint. |
-| `src/pages/EventDetail.tsx` | Live detail + sessions list; register/calendar **stubbed** (“next phase”). |
+| `src/pages/EventDetail.tsx` | Live detail + sessions; register/cancel/leave waitlist; calendar export still stubbed. |
 | `src/pages/CreateEvent.tsx` | `POST /events` + optional `submit`. |
 | `frontend/.env.example` | `VITE_API_BASE` |
 
@@ -101,6 +109,11 @@ Aligned with `CONTEXT.md`, `MASTER_IMPLEMENTATION_PLAN.md`, `reference_docs/db_d
 - Decision log and file-level notes captured for PR review.
 - Category filter bugfix: explicit slug → `event_type` mapping in `list_events`.
 - `CONTEXT.md` updated to describe AuthContext and API-backed flows.
+
+### 2026-04-02 (registrations slice)
+
+- Backend: `registration_service`, register/cancel routes on events, `GET /registrations/me`, `EventDetailOut.my_registration_status`.
+- Frontend: `useRegistrations`, Event detail + Event card + Calendar wired to API.
 
 ---
 

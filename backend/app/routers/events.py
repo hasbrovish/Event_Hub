@@ -14,7 +14,8 @@ from app.schemas.event import (
     EventUpdate,
     SubmitForApprovalBody,
 )
-from app.services import event_service
+from app.schemas.registration import RegistrationActionResponse
+from app.services import event_service, registration_service
 
 router = APIRouter(prefix="/events", tags=["events"])
 
@@ -39,6 +40,48 @@ async def list_events(
         current_user=user,
     )
     return EventListResponse(items=items, total=total, page=page, page_size=page_size)
+
+
+@router.post("/{event_id}/register", response_model=RegistrationActionResponse)
+async def register_for_event_route(
+    event_id: uuid.UUID,
+    db: Annotated[AsyncSession, Depends(get_db)],
+    user: Annotated[Employee, Depends(get_current_user)],
+) -> RegistrationActionResponse:
+    try:
+        reg_status, reg_id = await registration_service.register_for_event(db, event_id, user)
+    except LookupError:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Event not found")
+    except ValueError as e:
+        msg = str(e)
+        if msg == "already_registered":
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="Already registered or on waitlist",
+            )
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=msg)
+    return RegistrationActionResponse(
+        registration_id=reg_id,
+        registration_status=reg_status,
+    )
+
+
+@router.delete("/{event_id}/register", response_model=RegistrationActionResponse)
+async def cancel_event_registration_route(
+    event_id: uuid.UUID,
+    db: Annotated[AsyncSession, Depends(get_db)],
+    user: Annotated[Employee, Depends(get_current_user)],
+) -> RegistrationActionResponse:
+    try:
+        await registration_service.cancel_registration(db, event_id, user)
+    except LookupError:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="No registration found for this event",
+        )
+    except ValueError as e:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+    return RegistrationActionResponse(registration_status="cancelled")
 
 
 @router.get("/{event_id}", response_model=EventDetailOut)

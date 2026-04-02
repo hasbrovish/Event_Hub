@@ -101,6 +101,19 @@ async def _registration_counts(db: AsyncSession, event_ids: list[uuid.UUID]) -> 
     return {row[0]: int(row[1]) for row in rows}
 
 
+async def _my_registration_row_status(
+    db: AsyncSession, event_id: uuid.UUID, employee_wid: uuid.UUID | None
+) -> str | None:
+    if employee_wid is None:
+        return None
+    stmt = select(Registration.status).where(
+        Registration.event_id == event_id,
+        Registration.employee_wid == employee_wid,
+        Registration.status.in_(["registered", "waitlisted"]),
+    )
+    return (await db.execute(stmt)).scalar_one_or_none()
+
+
 async def _my_registrations(db: AsyncSession, employee_wid: uuid.UUID | None) -> set[uuid.UUID]:
     if employee_wid is None:
         return set()
@@ -206,6 +219,7 @@ async def get_event_detail(
         )
         for s in sessions
     ]
+    my_reg_status = await _my_registration_row_status(db, ev.id, current_user.wid if current_user else None)
     return EventDetailOut(
         **base.model_dump(),
         delivery_method=ev.delivery_method,
@@ -214,6 +228,7 @@ async def get_event_detail(
         created_by=str(ev.created_by),
         db_status=ev.status,
         sessions=sess_out,
+        my_registration_status=my_reg_status,
     )
 
 
@@ -307,3 +322,9 @@ async def submit_for_approval(db: AsyncSession, event_id: uuid.UUID, actor: Empl
     )
     await db.flush()
     return ev
+
+
+async def list_item_for_viewer(db: AsyncSession, ev: Event, viewer: Employee | None) -> EventListItem:
+    counts = await _registration_counts(db, [ev.id])
+    my_regs = await _my_registrations(db, viewer.wid if viewer else None)
+    return _to_list_item(ev, counts.get(ev.id, 0), my_regs)
