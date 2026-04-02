@@ -20,13 +20,26 @@ Ensure the server listens on **`localhost` / `127.0.0.1`** and port **`5432`** (
 
 ## 2. Create role and database (once)
 
-Connect as the **superuser** your install uses (often `postgres` on Windows/Linux, or your macOS user for local Homebrew/Postgres.app):
+**Automated (from repo root):**
+
+```bash
+./scripts/setup-db.sh
+```
+
+If the default superuser `postgres` does not exist (common on Homebrew Mac), set your OS user:
+
+```bash
+export PGUSER=$(whoami)
+./scripts/setup-db.sh
+```
+
+**Manual:** connect as superuser and run:
 
 ```bash
 psql -h 127.0.0.1 -p 5432 -U postgres -f scripts/init_local_db.sql
 ```
 
-Or paste the SQL from `scripts/init_local_db.sql` into any SQL client connected as superuser.
+Or paste the SQL from `scripts/init_local_db.sql` into any SQL client.
 
 If your admin gives you an **existing** database URL instead, skip this and only edit `backend/.env`.
 

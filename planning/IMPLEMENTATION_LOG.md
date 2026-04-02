@@ -139,7 +139,7 @@ Aligned with `CONTEXT.md`, `MASTER_IMPLEMENTATION_PLAN.md`, `reference_docs/db_d
 ### 2026-04-02 (local Postgres without Docker)
 
 - `planning/LOCAL_POSTGRES_SETUP.md` for corporate laptops without Docker Desktop.
-- `scripts/init_local_db.sql` to create `eventhub` role/DB; cross-links from `DOCKER_SETUP.md`, `.env.example`, run scripts.
+- `scripts/init_local_db.sql` + `scripts/setup-db.sh` (init + `alembic upgrade head`); cross-links from `DOCKER_SETUP.md`, `.env.example`, run scripts.
 
 ### 2026-04-02 (offline Swagger /docs)
 
