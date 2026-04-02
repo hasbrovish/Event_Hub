@@ -193,6 +193,7 @@ Use this as a **program-level** sequence:
 
 | Document | Use for |
 |----------|---------|
+| `planning/FINAL_OPERATIONS_AND_PROMPTS_GUIDE.md` | **Windows/macOS packaging**, dev order, Copilot index |
 | `README.md` | Local dev, Electron scripts, ports |
 | `CONTEXT.md` | Product scope, Infosys API table (illustrative URLs) |
 | `planning/IMPLEMENTED_FEATURES.md` | What is implemented vs stubbed today |

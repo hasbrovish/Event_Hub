@@ -11,7 +11,8 @@
  * | Zscaler / TLS        | OS trust store; optional `NODE_EXTRA_CA_CERTS` for child proc |
  * | Backend child spawn  | `startBackend()` — dev only; production points to remote API |
  *
- * See: planning/MASTER_FINAL_PLAN.md Phase F5
+ * See: planning/FINAL_OPERATIONS_AND_PROMPTS_GUIDE.md (desktop build + Windows)
+ *      planning/MASTER_FINAL_PLAN.md Phase F5
  *      frontend/src/lib/corporateIntegrationPoints.ts
  */
 const { app, BrowserWindow, Tray, Menu, nativeImage } = require("electron");

@@ -14,7 +14,7 @@ export default function Campaigns() {
   const { toast } = useToast();
   const { isAuthenticated, user } = useAuth();
   const canOrganize = user?.roles.some((r) =>
-    ["organizer", "admin", "platform_admin"].includes(r),
+    ["organizer", "admin", "platform_admin", "governance"].includes(r),
   );
 
   const eventsQ = useEvents({ page_size: 80 });
@@ -61,10 +61,16 @@ export default function Campaigns() {
   if (!isAuthenticated || !canOrganize) {
     return (
       <div className="p-6 max-w-4xl mx-auto">
-        <p className="text-muted-foreground">Organizer, admin, or platform_admin role required.</p>
+        <p className="text-muted-foreground">
+          Organizer, governance team, admin, or platform_admin role required (see PS.md).
+        </p>
       </div>
     );
   }
+
+  const isGovernanceOnly =
+    user?.roles.includes("governance") &&
+    !user.roles.some((r) => ["organizer", "admin", "platform_admin"].includes(r));
 
   return (
     <div className="p-6 max-w-4xl mx-auto space-y-6 animate-fade-in">
@@ -72,6 +78,12 @@ export default function Campaigns() {
         <div>
           <h1 className="text-2xl font-bold">Campaigns</h1>
           <p className="text-sm text-muted-foreground">Backed by <code className="text-xs">/campaigns</code> (mock post)</p>
+          {isGovernanceOnly && (
+            <p className="text-xs text-muted-foreground mt-2 max-w-xl">
+              <strong>Governance team</strong> (PS.md): schedule Teams / Viva / InfyMe-style campaigns for published
+              events. Event approval stays with <strong>Event Organizers</strong>.
+            </p>
+          )}
         </div>
       </div>
 

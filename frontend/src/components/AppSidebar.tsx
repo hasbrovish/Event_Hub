@@ -10,6 +10,7 @@ import {
   Bell,
   ChevronDown,
   ClipboardList,
+  Megaphone,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useAuth, type UserRole } from "@/contexts/AuthContext";
@@ -36,7 +37,8 @@ import {
 const roleLabels: Record<UserRole, string> = {
   audience: "Audience",
   speaker: "Speaker",
-  organizer: "Organizer",
+  organizer: "Event Organizer",
+  governance: "Governance team",
   admin: "App Admin",
 };
 
@@ -44,6 +46,7 @@ const roleIcons: Record<UserRole, typeof Users> = {
   audience: Users,
   speaker: Mic,
   organizer: Shield,
+  governance: Megaphone,
   admin: BarChart3,
 };
 
@@ -69,6 +72,14 @@ const organizerItems = [
   { title: "My Calendar", url: "/calendar", icon: Calendar },
 ];
 
+/** PS.md — Governance (IC/HR): campaigning for events; not the approval queue (Organizer). */
+const governanceItems = [
+  { title: "Dashboard", url: "/", icon: Home },
+  { title: "Campaigns", url: "/campaigns", icon: Megaphone },
+  { title: "Notifications", url: "/notifications", icon: Bell },
+  { title: "My Calendar", url: "/calendar", icon: Calendar },
+];
+
 const adminItems = [
   { title: "Dashboard", url: "/", icon: Home },
   { title: "Access Matrix", url: "/admin/access", icon: Shield },
@@ -82,6 +93,7 @@ const roleMenuItems: Record<UserRole, typeof audienceItems> = {
   audience: audienceItems,
   speaker: speakerItems,
   organizer: organizerItems,
+  governance: governanceItems,
   admin: adminItems,
 };
 

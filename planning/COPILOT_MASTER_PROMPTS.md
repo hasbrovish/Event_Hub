@@ -1,5 +1,7 @@
 # Event Hub — master Copilot prompt pack (corporate laptop)
 
+**Entry point:** [`planning/FINAL_OPERATIONS_AND_PROMPTS_GUIDE.md`](FINAL_OPERATIONS_AND_PROMPTS_GUIDE.md) (doc map, Windows desktop, verification order).
+
 Use this file **on a corporate machine** with **GitHub Copilot Chat**, **Copilot in VS Code / Cursor**, or similar. It aligns work with **`planning/MASTER_FINAL_PLAN.md`** and the code seams in **`backend/app/integrations/corporate_stubs.py`**.
 
 ---

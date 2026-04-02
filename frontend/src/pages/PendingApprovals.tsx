@@ -38,7 +38,7 @@ export default function PendingApprovals() {
           Pending approvals
         </h1>
         <p className="text-sm text-muted-foreground mt-1">
-          Events submitted for governance review. Approve to publish, reject, or request changes.
+          Events submitted for organizer review (PS.md: Event Organizer approves; Governance focuses on campaigning).
         </p>
       </div>
 

@@ -8,6 +8,7 @@ frontend/.env.local
 __pycache__/
 *.py[cod]
 node_modules/
+dist-electron/
 out/
 .DS_Store
 Thumbs.db

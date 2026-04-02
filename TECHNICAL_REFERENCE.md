@@ -5,6 +5,7 @@ This document **bridges** the long-form blueprint [`MASTER_IMPLEMENTATION_PLAN.m
 | Document | Role |
 |----------|------|
 | **This file** | Phase alignment, gaps vs master plan, architecture summary, where to look in code |
+| [`planning/FINAL_OPERATIONS_AND_PROMPTS_GUIDE.md`](planning/FINAL_OPERATIONS_AND_PROMPTS_GUIDE.md) | **Run + package** (Windows/macOS), Copilot entry, doc map |
 | [`planning/MASTER_FINAL_PLAN.md`](planning/MASTER_FINAL_PLAN.md) | PS-oriented closure plan (F0–F8), **Copilot integration index** → `backend/app/integrations/corporate_stubs.py` |
 | [`planning/IMPLEMENTED_FEATURES.md`](planning/IMPLEMENTED_FEATURES.md) | Canonical **implemented** routes, models, UI routes, deferred items (§6) |
 | [`CONTEXT.md`](CONTEXT.md) | Product intent, illustrative Infosys API table, mock vs real (some rows stale vs code) |

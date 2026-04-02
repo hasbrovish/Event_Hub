@@ -14,7 +14,7 @@
  * | Teams / Viva pickers       | `Campaigns.tsx` — uses `GET /integrations/teams-channels`, `viva-groups` |
  * | Outlook / .ics             | Event detail — download links calling API calendar routes |
  * | Native notifications       | `electron/main.cjs`, `electron/preload.cjs` (not React-only) |
- * | Governance persona UI      | `AuthContext` maps `governance` → organizer menu for campaigns |
+ * | Governance persona UI      | `UserRole` `governance` + `AppSidebar` `governanceItems` (campaigning per PS.md) |
  *
  * Backend single source of truth for mocks:
  *   `backend/app/integrations/corporate_stubs.py`

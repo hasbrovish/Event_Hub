@@ -150,7 +150,7 @@ This section lists what is **intentionally not built yet** or only **stubbed**, 
 
 | Item | Status |
 |------|--------|
-| Separate **governance** persona / role enum | Not modeled; organizers use **`group_admins`** scoping instead |
+| Separate **governance** persona | **`governance`** in `employee_roles`; UI persona **Governance team** (sidebar: Dashboard, Campaigns, Notifications, Calendar); API: campaigns + integrations; **not** approval queue (PS.md — organizers approve) |
 | **Background hub** behavior (idle, auto-popup, “away 1h”) | Not implemented in web/Electron |
 | **Daily / weekly notification digests** | `notification_frequency` values exist; **no scheduler** batches digests |
 | **Event reminders** (e.g. 1h before) | **In-app** reminders for registered users (~24h / ~1h windows); no email/push |

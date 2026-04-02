@@ -11,12 +11,12 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiFetch, getStoredToken, setStoredRefresh, setStoredToken } from "@/lib/api";
 import type { EmployeeMe, LoginResponse } from "@/types/api";
 
-export type UserRole = "audience" | "speaker" | "organizer" | "admin";
+/** UI personas — PS.md: App Admin, Organizer, Governance team, Speaker, Audience */
+export type UserRole = "audience" | "speaker" | "organizer" | "governance" | "admin";
 
 function mapRole(r: string): UserRole | null {
   if (r === "platform_admin") return "admin";
-  // Governance (PS stakeholder): campaign / comms surfaces — use organizer nav + campaigns
-  if (r === "governance") return "organizer";
+  if (r === "governance") return "governance";
   if (r === "audience" || r === "speaker" || r === "organizer" || r === "admin") return r;
   return null;
 }
@@ -66,7 +66,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (x) m.add(x);
     }
     if (m.size === 0) m.add("audience");
-    const order: UserRole[] = ["admin", "organizer", "speaker", "audience"];
+    const order: UserRole[] = ["admin", "organizer", "governance", "speaker", "audience"];
     return order.filter((x) => m.has(x));
   }, [user]);
 
@@ -89,7 +89,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           email: "dev.user@example.com",
           first_name: "Dev",
           last_name: "User",
-          roles: ["audience", "speaker", "organizer", "admin", "platform_admin"],
+          roles: ["audience", "speaker", "organizer", "governance", "admin", "platform_admin"],
         }),
       }),
     onSuccess: (data) => {

@@ -4,7 +4,7 @@ Internal event discovery and governance platform: **React** UI (Vite, TypeScript
 
 Repository: [github.com/hasbrovish/Event_Hub](https://github.com/hasbrovish/Event_Hub)
 
-**Docs:** **[`TECHNICAL_REFERENCE.md`](TECHNICAL_REFERENCE.md)** — architecture summary, **12-phase alignment vs `MASTER_IMPLEMENTATION_PLAN.md`**, and consolidated gaps (enterprise SSO, Zscaler, desktop hardening, testing). **[`planning/MASTER_FINAL_PLAN.md`](planning/MASTER_FINAL_PLAN.md)** — gap closure toward PS **~100%**, integration seams, phased F0–F8. **[`planning/IMPLEMENTED_FEATURES.md`](planning/IMPLEMENTED_FEATURES.md)** — route-by-route and schema reference for what is implemented today.
+**Docs:** **[`planning/FINAL_OPERATIONS_AND_PROMPTS_GUIDE.md`](planning/FINAL_OPERATIONS_AND_PROMPTS_GUIDE.md)** — **start here**: run stack, **Windows/macOS desktop builds**, Copilot prompting, doc map. **[`TECHNICAL_REFERENCE.md`](TECHNICAL_REFERENCE.md)** — architecture summary, **12-phase alignment vs `MASTER_IMPLEMENTATION_PLAN.md`**, and consolidated gaps (enterprise SSO, Zscaler, desktop hardening, testing). **[`planning/MASTER_FINAL_PLAN.md`](planning/MASTER_FINAL_PLAN.md)** — gap closure toward PS **~100%**, integration seams, phased F0–F8. **[`planning/IMPLEMENTED_FEATURES.md`](planning/IMPLEMENTED_FEATURES.md)** — route-by-route and schema reference for what is implemented today.
 
 ---
 
@@ -136,6 +136,8 @@ npm run build:desktop
 npm run start:desktop
 ```
 
+**Windows / macOS installers** (after `npm install` at repo root): `npm run dist:win` or `npm run dist:mac` — outputs under `dist-electron/`. Full steps: [`planning/FINAL_OPERATIONS_AND_PROMPTS_GUIDE.md`](planning/FINAL_OPERATIONS_AND_PROMPTS_GUIDE.md).
+
 ---
 
 ## Frontend quality scripts
@@ -152,7 +154,9 @@ npm test -w frontend
 
 | Document | Contents |
 |----------|----------|
+| [`planning/FINAL_OPERATIONS_AND_PROMPTS_GUIDE.md`](planning/FINAL_OPERATIONS_AND_PROMPTS_GUIDE.md) | **Operations hub**: Windows desktop build, run order, Copilot, doc map |
 | [`TECHNICAL_REFERENCE.md`](TECHNICAL_REFERENCE.md) | **Master plan gap analysis**, architecture, backlog themes, file map |
+| [`planning/PS_AND_APIS_CROSSWALK.md`](planning/PS_AND_APIS_CROSSWALK.md) | **PS.md × `apis.json`**: five LEX/InfyMe surfaces, personas, workflows, gaps |
 | [`planning/MASTER_FINAL_PLAN.md`](planning/MASTER_FINAL_PLAN.md) | **PS ~100% roadmap**, Copilot integration index, F0–F8 phases |
 | [`planning/COPILOT_MASTER_PROMPTS.md`](planning/COPILOT_MASTER_PROMPTS.md) | **Copy-paste prompts** for Copilot on corporate laptops (F1–F8 + verification) |
 | [`MASTER_IMPLEMENTATION_PLAN.md`](MASTER_IMPLEMENTATION_PLAN.md) | Full phased blueprint (workflows, API catalog, testing, Zscaler, packaging) |

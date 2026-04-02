@@ -10,6 +10,9 @@ This document is the **execution blueprint** to close gaps against **`reference_
 **Ready-made Copilot prompts (paste into Copilot Chat):**  
 → [`planning/COPILOT_MASTER_PROMPTS.md`](COPILOT_MASTER_PROMPTS.md)
 
+**Run stack, Windows/macOS installers, doc map:**  
+→ [`planning/FINAL_OPERATIONS_AND_PROMPTS_GUIDE.md`](FINAL_OPERATIONS_AND_PROMPTS_GUIDE.md)
+
 ---
 
 ## 1. Current gap summary (vs PS must-haves)

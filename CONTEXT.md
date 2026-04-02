@@ -2,6 +2,7 @@
 
 > This file provides full context for AI-assisted development (Cursor, Claude Code, Copilot, etc.).
 > Read this before making any changes to the codebase.
+> For **how to run, build Windows/macOS desktop packages, and prompt Copilot**, see [`planning/FINAL_OPERATIONS_AND_PROMPTS_GUIDE.md`](planning/FINAL_OPERATIONS_AND_PROMPTS_GUIDE.md).
 
 ---
 
@@ -72,10 +73,12 @@ Built as a **desktop + web hybrid** using:
 |---|---|---|
 | `audience` | All employees | Discover events, register, set preferences, add to calendar |
 | `speaker` | Proposing employee | Propose events, manage own sessions |
-| `organizer` | Group-mapped admin | Create/approve events, manage campaigns |
-| `admin` | Platform admin | Full access, logs, config, access matrix |
+| `organizer` | Group-mapped admin | Approve/reject/modify proposed events (`/approvals`), manage events, campaigns |
+| `governance` | IC / HR per PS.md | **Campaigning** (Teams/Viva/InfyMe flows via `/campaigns`, `/integrations/*`); not the approval queue |
+| `admin` | Platform admin | User/role matrix, logs, config; broad access |
+| `platform_admin` | Super-admin | Same as admin + destructive config / role changes |
 
-Role is stored in `AuthContext` (`frontend/src/contexts/AuthContext.tsx`): JWT-backed user, `availableRoles`, and active UI persona. Default before sign-in: `audience`.
+Role is stored in `AuthContext` (`frontend/src/contexts/AuthContext.tsx`): JWT-backed user, `availableRoles`, and active UI persona (`governance` shows as **Governance team**). Default before sign-in: `audience`.
 
 ---
 
@@ -205,17 +208,19 @@ Event_Hub/
 
 ## External APIs (Infosys Internal)
 
-All use session-based auth (cookies). CORS configured for localhost:8080.
+**Persona × workflow × sample payloads:** [`planning/PS_AND_APIS_CROSSWALK.md`](planning/PS_AND_APIS_CROSSWALK.md). Raw samples: `reference_docs/apis.json`.
 
-| API | URL | Use |
+Corporate gateways typically use session/cookie auth; CORS is app-specific. Event Hub dev uses JWT + mocks unless SSO env is set.
+
+| API | URL (from `reference_docs/apis.json`) | Use |
 |---|---|---|
-| Get Units | `POST lex.infosysapps.com/.../get/unit` | Unit dropdown |
-| Get Sub-Units | `POST lex.infosysapps.com/.../get/sub_unit` | Sub-unit cascade dropdown |
-| Event Search | `POST lex.infosysapps.com/.../event-search` | Event discovery + filtering |
-| Current User | `GET lex.infosysapps.com/.../me/users/view` | Auto-populate user profile on login |
-| Employee Info | `GET infyme.infosysapps.com/.../GetEmployeeOfficialInfoNew` | Extended org details |
+| Get Units | `POST …/master-data/get/unit` | Unit dropdown |
+| Get Sub-Units | `POST …/master-data/get/sub_unit` | Sub-unit cascade; `meta_values.admin` emails for chapter admins |
+| Event Search | `POST …/schedulo-search/v1/event-search` | LEX event discovery / stats / speakers (federation candidate) |
+| Current User | `GET …/infy-user-management-service/v2/me/users/view` | Auto profile (`wid`, org tree, job) on SSO login |
+| Employee Info | `GET infyme…/GetEmployeeOffcialInfoNew` | Rich official-info UI model (optional enrichment) |
 
-Cache unit/sub-unit responses with 1-hour TTL.
+Cache unit/sub-unit responses with ~1-hour TTL when wired.
 
 ---
 
@@ -228,9 +233,9 @@ Cache unit/sub-unit responses with 1-hour TTL.
 | Role switching | Real roles from `/auth/me`; sidebar shows only assigned roles |
 | Registration | **API** `POST/DELETE /events/{id}/register`, `GET /registrations/me` |
 | Approval queue (review) | **API** `GET /approvals/pending`, `PATCH /approvals/:id` (UI: `/approvals`) |
-| Notifications | Mock |
-| Campaigns | Mock |
-| Admin data | Mock |
+| Notifications | **API** `GET/PATCH /notifications` (in-app; not InfyMe push) |
+| Campaigns | **API** CRUD + send-now; **delivery** mock (Teams/Viva/InfyMe TBD) |
+| Admin (config, logs, matrix) | **API** file-backed config + audit logs; LEX master-data still mock |
 | Health endpoint | Real (`GET /health`) |
 
 **Everything needs to be wired to real backend APIs.**
