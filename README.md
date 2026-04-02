@@ -2,6 +2,8 @@
 
 Desktop application shell built with **Electron**, a **React** UI (Vite, TypeScript, Tailwind, shadcn-style components), and a **FastAPI** backend.
 
+Repository: [github.com/hasbrovish/Event_Hub](https://github.com/hasbrovish/Event_Hub)
+
 ## Prerequisites
 
 - **Node.js** and **npm** (use **npm 7+** for workspaces)
