@@ -6,3 +6,5 @@ out/
 .DS_Store
 Thumbs.db
 *.log
+reference_docs/apis.json
+reference_docs/apis.json.b64
