@@ -21,9 +21,16 @@ const categoryLabels: Record<string, string> = {
   product: "Product",
 };
 
-export function EventCard({ event }: { event: EventData }) {
+export interface EventCardProps {
+  event: EventData;
+  registeredOverride?: boolean;
+  onRegisterToggle?: (eventId: string) => void;
+}
+
+export function EventCard({ event, registeredOverride, onRegisterToggle }: EventCardProps) {
   const navigate = useNavigate();
   const fillPercent = Math.round((event.attendees / event.maxAttendees) * 100);
+  const isRegistered = registeredOverride !== undefined ? registeredOverride : !!event.isRegistered;
 
   return (
     <Card
@@ -38,7 +45,7 @@ export function EventCard({ event }: { event: EventData }) {
           {event.status === "live" && (
             <Badge className="bg-destructive text-destructive-foreground animate-pulse text-xs">● LIVE</Badge>
           )}
-          {event.isRegistered && event.status !== "live" && (
+          {isRegistered && event.status !== "live" && (
             <Badge variant="outline" className="border-primary text-primary text-xs">Registered</Badge>
           )}
         </div>
@@ -77,11 +84,14 @@ export function EventCard({ event }: { event: EventData }) {
           </div>
           <Button
             size="sm"
-            variant={event.isRegistered ? "outline" : "default"}
+            variant={isRegistered ? "outline" : "default"}
             className="h-7 text-xs"
-            onClick={(e) => { e.stopPropagation(); }}
+            onClick={(e) => {
+              e.stopPropagation();
+              onRegisterToggle?.(event.id);
+            }}
           >
-            {event.isRegistered ? "Registered ✓" : "Register"}
+            {isRegistered ? "Registered ✓" : "Register"}
           </Button>
         </div>
       </CardContent>

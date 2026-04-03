@@ -2,6 +2,8 @@ import { createContext, useContext, useState, ReactNode } from "react";
 
 export type UserRole = "audience" | "speaker" | "organizer" | "admin";
 
+export const DEFAULT_HOME_PATH = "/";
+
 interface RoleContextType {
   role: UserRole;
   setRole: (role: UserRole) => void;

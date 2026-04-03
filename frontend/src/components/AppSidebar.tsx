@@ -10,8 +10,9 @@ import {
   Bell,
   ChevronDown,
 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { NavLink } from "@/components/NavLink";
-import { useRole, UserRole } from "@/contexts/RoleContext";
+import { DEFAULT_HOME_PATH, useRole, UserRole } from "@/contexts/RoleContext";
 import {
   Sidebar,
   SidebarContent,
@@ -83,11 +84,17 @@ const roleMenuItems: Record<UserRole, typeof audienceItems> = {
 };
 
 export function AppSidebar() {
+  const navigate = useNavigate();
   const { state } = useSidebar();
   const collapsed = state === "collapsed";
   const { role, setRole } = useRole();
   const items = roleMenuItems[role];
   const RoleIcon = roleIcons[role];
+
+  const switchRole = (r: UserRole) => {
+    setRole(r);
+    navigate(DEFAULT_HOME_PATH);
+  };
 
   return (
     <Sidebar collapsible="icon">
@@ -139,7 +146,10 @@ export function AppSidebar() {
       <SidebarFooter className="p-3">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <button className="flex items-center gap-2 w-full p-2 rounded-lg hover:bg-sidebar-accent/50 transition-colors text-sidebar-foreground text-sm">
+            <button
+              type="button"
+              className="flex items-center gap-2 w-full p-2 rounded-lg hover:bg-sidebar-accent/50 transition-colors text-sidebar-foreground text-sm"
+            >
               <RoleIcon className="h-4 w-4 text-sidebar-primary" />
               {!collapsed && (
                 <>
@@ -153,7 +163,11 @@ export function AppSidebar() {
             {(Object.keys(roleLabels) as UserRole[]).map((r) => {
               const Icon = roleIcons[r];
               return (
-                <DropdownMenuItem key={r} onClick={() => setRole(r)} className={role === r ? "bg-accent" : ""}>
+                <DropdownMenuItem
+                  key={r}
+                  onClick={() => switchRole(r)}
+                  className={role === r ? "bg-accent" : ""}
+                >
                   <Icon className="mr-2 h-4 w-4" />
                   {roleLabels[r]}
                 </DropdownMenuItem>

@@ -1,50 +1,71 @@
 import { ReactNode } from "react";
+import { useNavigate } from "react-router-dom";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
 import { RoleProvider } from "@/contexts/RoleContext";
+import { SearchProvider, useSearchQuery } from "@/contexts/SearchContext";
 import { Bell, Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
+function HeaderBar() {
+  const navigate = useNavigate();
+  const { searchQuery, setSearchQuery } = useSearchQuery();
+
+  return (
+    <header className="h-14 flex items-center border-b bg-card px-4 gap-3 sticky top-0 z-10">
+      <SidebarTrigger className="shrink-0" />
+      <div className="flex-1 max-w-md">
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input
+            placeholder="Search events, speakers, topics..."
+            className="pl-9 bg-secondary border-0 h-9"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            aria-label="Search events"
+          />
+        </div>
+      </div>
+      <div className="flex items-center gap-2 ml-auto">
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon"
+          className="relative"
+          onClick={() => navigate("/notifications")}
+          aria-label="Notifications"
+        >
+          <Bell className="h-4 w-4" />
+          <span className="absolute -top-0.5 -right-0.5 h-4 w-4 rounded-full bg-destructive text-destructive-foreground text-[10px] flex items-center justify-center font-medium">
+            3
+          </span>
+        </Button>
+        <Button type="button" variant="ghost" size="icon" className="p-0 rounded-full" onClick={() => navigate("/preferences")}>
+          <Avatar className="h-8 w-8 cursor-pointer">
+            <AvatarFallback className="bg-primary text-primary-foreground text-xs font-semibold">JD</AvatarFallback>
+          </Avatar>
+        </Button>
+      </div>
+    </header>
+  );
+}
+
 export function AppLayout({ children }: { children: ReactNode }) {
   return (
     <RoleProvider>
-      <SidebarProvider>
-        <div className="min-h-screen flex w-full">
-          <AppSidebar />
-          <div className="flex-1 flex flex-col min-w-0">
-            <header className="h-14 flex items-center border-b bg-card px-4 gap-3 sticky top-0 z-10">
-              <SidebarTrigger className="shrink-0" />
-              <div className="flex-1 max-w-md">
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    placeholder="Search events, speakers, topics..."
-                    className="pl-9 bg-secondary border-0 h-9"
-                  />
-                </div>
-              </div>
-              <div className="flex items-center gap-2 ml-auto">
-                <Button variant="ghost" size="icon" className="relative">
-                  <Bell className="h-4 w-4" />
-                  <span className="absolute -top-0.5 -right-0.5 h-4 w-4 rounded-full bg-destructive text-destructive-foreground text-[10px] flex items-center justify-center font-medium">
-                    3
-                  </span>
-                </Button>
-                <Avatar className="h-8 w-8 cursor-pointer">
-                  <AvatarFallback className="bg-primary text-primary-foreground text-xs font-semibold">
-                    JD
-                  </AvatarFallback>
-                </Avatar>
-              </div>
-            </header>
-            <main className="flex-1 overflow-auto">
-              {children}
-            </main>
+      <SearchProvider>
+        <SidebarProvider>
+          <div className="min-h-screen flex w-full">
+            <AppSidebar />
+            <div className="flex-1 flex flex-col min-w-0">
+              <HeaderBar />
+              <main className="flex-1 overflow-auto">{children}</main>
+            </div>
           </div>
-        </div>
-      </SidebarProvider>
+        </SidebarProvider>
+      </SearchProvider>
     </RoleProvider>
   );
 }
