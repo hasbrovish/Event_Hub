@@ -1,8 +1,9 @@
 import { EventData } from "@/data/mockEvents";
+import { cn } from "@/lib/utils";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Calendar, Clock, MapPin, Users } from "lucide-react";
+import { Calendar, Check, Clock, MapPin, Users } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 const categoryStyles: Record<string, string> = {
@@ -43,10 +44,19 @@ export function EventCard({ event, registeredOverride, onRegisterToggle }: Event
             {categoryLabels[event.category]}
           </Badge>
           {event.status === "live" && (
-            <Badge className="bg-destructive text-destructive-foreground animate-pulse text-xs">● LIVE</Badge>
+            <Badge className="bg-destructive text-destructive-foreground text-xs gap-1 font-semibold">
+              <span className="relative flex h-1.5 w-1.5">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary-foreground opacity-75" />
+                <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-primary-foreground" />
+              </span>
+              LIVE
+            </Badge>
           )}
           {isRegistered && event.status !== "live" && (
-            <Badge variant="outline" className="border-primary text-primary text-xs">Registered</Badge>
+            <Badge variant="outline" className="border-primary text-primary text-xs gap-1">
+              <Check className="h-3 w-3" strokeWidth={2.5} />
+              Registered
+            </Badge>
           )}
         </div>
 
@@ -85,13 +95,20 @@ export function EventCard({ event, registeredOverride, onRegisterToggle }: Event
           <Button
             size="sm"
             variant={isRegistered ? "outline" : "default"}
-            className="h-7 text-xs"
+            className={cn("h-8 text-xs gap-1.5 font-medium", isRegistered && "border-primary text-primary")}
             onClick={(e) => {
               e.stopPropagation();
               onRegisterToggle?.(event.id);
             }}
           >
-            {isRegistered ? "Registered ✓" : "Register"}
+            {isRegistered ? (
+              <>
+                <Check className="h-3.5 w-3.5" strokeWidth={2.5} />
+                Registered
+              </>
+            ) : (
+              "Register"
+            )}
           </Button>
         </div>
       </CardContent>

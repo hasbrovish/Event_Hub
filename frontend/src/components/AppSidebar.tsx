@@ -1,6 +1,7 @@
 import {
   Calendar,
   Home,
+  List,
   Plus,
   Settings,
   Shield,
@@ -59,6 +60,7 @@ const speakerItems = [
   { title: "Propose Event", url: "/create-event", icon: Plus },
   { title: "My Sessions", url: "/my-sessions", icon: Mic },
   { title: "My Calendar", url: "/calendar", icon: Calendar },
+  { title: "Notifications", url: "/notifications", icon: Bell },
 ];
 
 const organizerItems = [
@@ -66,12 +68,15 @@ const organizerItems = [
   { title: "Manage Events", url: "/manage-events", icon: Settings },
   { title: "Campaigns", url: "/campaigns", icon: BarChart3 },
   { title: "My Calendar", url: "/calendar", icon: Calendar },
+  { title: "Notifications", url: "/notifications", icon: Bell },
 ];
 
 const adminItems = [
   { title: "Dashboard", url: "/", icon: Home },
+  { title: "My Calendar", url: "/calendar", icon: Calendar },
+  { title: "Notifications", url: "/notifications", icon: Bell },
   { title: "Access Matrix", url: "/admin/access", icon: Shield },
-  { title: "All Events", url: "/manage-events", icon: Calendar },
+  { title: "All Events", url: "/manage-events", icon: List },
   { title: "System Logs", url: "/admin/logs", icon: BarChart3 },
   { title: "App Config", url: "/admin/config", icon: Settings },
 ];
