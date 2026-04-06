@@ -54,7 +54,7 @@ const ratingData = [
 
 type ProposalStatus = (typeof proposals)[number]["status"];
 
-export default function SpeakerHome() {
+export function SpeakSection() {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [proposalTab, setProposalTab] = useState<"all" | ProposalStatus>("all");
@@ -69,95 +69,30 @@ export default function SpeakerHome() {
   }, []);
 
   return (
-    <div className="p-6 max-w-7xl mx-auto space-y-6 animate-fade-in pb-16">
-      <Card className="border-0 shadow-elevated overflow-hidden bg-[hsl(174_62%_28%)] text-primary-foreground">
-        <CardContent className="p-6 sm:p-8">
-          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
-            <div className="space-y-4 max-w-xl">
-              <p className="text-xs uppercase tracking-wider opacity-80">Speaker dashboard</p>
-              <h1 className="text-2xl sm:text-3xl font-bold tracking-tight flex flex-wrap items-center gap-2">
-                Your speaking impact <Mic className="h-8 w-8 opacity-95" />
-              </h1>
-              <p className="text-sm opacity-90">
-                Track your sessions, proposals, and audience engagement all in one place.
-              </p>
-              <Button
-                type="button"
-                className="gap-2 bg-primary-foreground text-[hsl(174_62%_22%)] hover:bg-primary-foreground/90"
-                onClick={() => navigate("/create-event")}
-              >
-                <Plus className="h-4 w-4" />
-                Propose new event
-              </Button>
-            </div>
-            <div className="grid grid-cols-2 gap-2 sm:gap-3 shrink-0 max-w-sm">
-              <div className="rounded-xl bg-primary-foreground/10 border border-primary-foreground/20 p-3 text-center">
-                <p className="text-lg font-bold">{mySessions.length}</p>
-                <p className="text-[10px] sm:text-xs opacity-80 mt-0.5">Sessions</p>
-              </div>
-              <div className="rounded-xl bg-primary-foreground/10 border border-primary-foreground/20 p-3 text-center">
-                <p className="text-lg font-bold">4.8</p>
-                <p className="text-[10px] sm:text-xs opacity-80 mt-0.5">Avg rating</p>
-              </div>
-              <div className="rounded-xl bg-primary-foreground/10 border border-primary-foreground/20 p-3 text-center">
-                <p className="text-lg font-bold">237</p>
-                <p className="text-[10px] sm:text-xs opacity-80 mt-0.5">Audience</p>
-              </div>
-              <div className="rounded-xl bg-primary-foreground/10 border border-primary-foreground/20 p-3 text-center">
-                <p className="text-lg font-bold">42</p>
-                <p className="text-[10px] sm:text-xs opacity-80 mt-0.5">Feedback</p>
-              </div>
-            </div>
+    <div className="space-y-6 w-full">
+      <Card className="shadow-card border-border/60 border-primary/15 bg-primary/[0.03]">
+        <CardContent className="p-5 sm:p-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div className="space-y-1">
+            <p className="text-sm font-medium flex items-center gap-2">
+              <Mic className="h-4 w-4 text-primary" />
+              Grow your speaking footprint
+            </p>
+            <p className="text-sm text-muted-foreground">
+              Submit a new idea or open your session list — everything stays linked to this hub.
+            </p>
+          </div>
+          <div className="flex flex-wrap gap-2 shrink-0">
+            <Button type="button" className="gap-2" onClick={() => navigate("/create-event")}>
+              <Plus className="h-4 w-4" />
+              Propose new event
+            </Button>
+            <Button type="button" variant="outline" className="gap-2" onClick={() => navigate("/my-sessions")}>
+              My sessions
+              <ArrowRight className="h-4 w-4" />
+            </Button>
           </div>
         </CardContent>
       </Card>
-
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-        <Card className="shadow-card border-border/60">
-          <CardContent className="p-4 flex items-center gap-3">
-            <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
-              <Mic className="h-5 w-5 text-primary" />
-            </div>
-            <div>
-              <p className="text-2xl font-bold">{mySessions.length}</p>
-              <p className="text-xs text-muted-foreground">My sessions</p>
-            </div>
-          </CardContent>
-        </Card>
-        <Card className="shadow-card border-border/60">
-          <CardContent className="p-4 flex items-center gap-3">
-            <div className="h-10 w-10 rounded-lg bg-sky-500/15 flex items-center justify-center shrink-0">
-              <Users className="h-5 w-5 text-sky-600 dark:text-sky-400" />
-            </div>
-            <div>
-              <p className="text-2xl font-bold">237</p>
-              <p className="text-xs text-muted-foreground">Total audience</p>
-            </div>
-          </CardContent>
-        </Card>
-        <Card className="shadow-card border-border/60">
-          <CardContent className="p-4 flex items-center gap-3">
-            <div className="h-10 w-10 rounded-lg bg-amber-500/15 flex items-center justify-center shrink-0">
-              <Star className="h-5 w-5 text-amber-600 dark:text-amber-400" />
-            </div>
-            <div>
-              <p className="text-2xl font-bold">4.8</p>
-              <p className="text-xs text-muted-foreground">Avg rating</p>
-            </div>
-          </CardContent>
-        </Card>
-        <Card className="shadow-card border-border/60">
-          <CardContent className="p-4 flex items-center gap-3">
-            <div className="h-10 w-10 rounded-lg bg-violet-500/15 flex items-center justify-center shrink-0">
-              <MessageCircle className="h-5 w-5 text-violet-600 dark:text-violet-400" />
-            </div>
-            <div>
-              <p className="text-2xl font-bold">42</p>
-              <p className="text-xs text-muted-foreground">Feedback</p>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
 
       <Card className="shadow-card border-border/60">
         <CardHeader className="flex flex-row items-center justify-between pb-2">

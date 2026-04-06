@@ -35,32 +35,24 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 const roleLabels: Record<UserRole, string> = {
-  audience: "Audience",
-  speaker: "Speaker",
+  participant: "Participant",
   organizer: "Organizer",
   admin: "App Admin",
 };
 
 const roleIcons: Record<UserRole, typeof Users> = {
-  audience: Users,
-  speaker: Mic,
+  participant: Users,
   organizer: Shield,
   admin: BarChart3,
 };
 
-const audienceItems = [
-  { title: "Discover Events", url: "/", icon: Home },
-  { title: "My Calendar", url: "/calendar", icon: Calendar },
-  { title: "Notifications", url: "/notifications", icon: Bell },
-  { title: "Preferences", url: "/preferences", icon: Settings },
-];
-
-const speakerItems = [
+const participantItems = [
   { title: "Discover Events", url: "/", icon: Home },
   { title: "Propose Event", url: "/create-event", icon: Plus },
   { title: "My Sessions", url: "/my-sessions", icon: Mic },
   { title: "My Calendar", url: "/calendar", icon: Calendar },
   { title: "Notifications", url: "/notifications", icon: Bell },
+  { title: "Preferences", url: "/preferences", icon: Settings },
 ];
 
 const organizerItems = [
@@ -81,9 +73,8 @@ const adminItems = [
   { title: "App Config", url: "/admin/config", icon: Settings },
 ];
 
-const roleMenuItems: Record<UserRole, typeof audienceItems> = {
-  audience: audienceItems,
-  speaker: speakerItems,
+const roleMenuItems: Record<UserRole, typeof participantItems> = {
+  participant: participantItems,
   organizer: organizerItems,
   admin: adminItems,
 };

@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, type Dispatch, type SetStateAction } from "react";
 import { useNavigate } from "react-router-dom";
 import { mockEvents } from "@/data/mockEvents";
 import { EventCard } from "@/components/EventCard";
@@ -23,12 +23,9 @@ import {
   List,
   MapPin,
   PartyPopper,
-  Play,
   Rocket,
   Star,
   Trophy,
-  Users,
-  Zap,
 } from "lucide-react";
 
 const categories = ["all", "tech", "domain", "health", "fun", "product"] as const;
@@ -49,32 +46,19 @@ function matchesSearch(q: string, text: string) {
   return text.toLowerCase().includes(q.trim().toLowerCase());
 }
 
-function greetingWord() {
-  const h = new Date().getHours();
-  if (h < 12) return "Good morning";
-  if (h < 17) return "Good afternoon";
-  return "Good evening";
-}
-
-export default function AudienceHome() {
+export function DiscoverSection({
+  registered,
+  setRegistered,
+}: {
+  registered: Record<string, boolean>;
+  setRegistered: Dispatch<SetStateAction<Record<string, boolean>>>;
+}) {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { searchQuery } = useSearchQuery();
   const [activeCategory, setActiveCategory] = useState<string>("all");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [audienceTab, setAudienceTab] = useState("schedule");
-  const [registered, setRegistered] = useState<Record<string, boolean>>(() => {
-    const init: Record<string, boolean> = {};
-    mockEvents.forEach((e) => {
-      if (e.isRegistered) init[e.id] = true;
-    });
-    return init;
-  });
-
-  const liveEvents = mockEvents.filter((e) => e.status === "live");
-  const upcomingCount = mockEvents.filter((e) => e.status === "upcoming").length;
-  const registeredCount = Object.values(registered).filter(Boolean).length;
-  const live = liveEvents[0];
 
   const filteredEvents = useMemo(() => {
     let list = activeCategory === "all" ? mockEvents : mockEvents.filter((e) => e.category === activeCategory);
@@ -125,12 +109,6 @@ export default function AudienceHome() {
           : `Removed registration for "${ev.title}".`
         : undefined,
     });
-  };
-
-  const onJoinLive = () => {
-    if (!live) return;
-    toast({ title: "Joining live session", description: live.title });
-    navigate(`/event/${live.id}`);
   };
 
   const scheduleRows = (events: typeof myUpcoming) =>
@@ -187,155 +165,8 @@ export default function AudienceHome() {
       </ul>
     );
 
-  const watchingCount = live ? live.attendees : 0;
-
   return (
-    <div className="p-6 max-w-7xl mx-auto space-y-8 animate-fade-in pb-16">
-      <Card className="border-0 shadow-elevated overflow-hidden text-primary-foreground">
-        <CardContent
-          className="p-6 sm:p-8 bg-gradient-to-r from-[hsl(174_55%_38%)] via-[hsl(190_50%_32%)] to-[hsl(215_45%_22%)]"
-        >
-          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
-            <div className="space-y-4 max-w-xl">
-              <h1 className="text-2xl sm:text-3xl font-bold tracking-tight leading-tight">
-                {greetingWord()}, welcome back, John! <span className="inline-block">👋</span>
-              </h1>
-              <p className="text-sm opacity-90">
-                You have {myUpcoming.length} upcoming session{myUpcoming.length !== 1 ? "s" : ""}
-                {live ? " and 1 event is live right now." : "."}
-              </p>
-              <div className="flex flex-wrap gap-2">
-                <Button
-                  type="button"
-                  variant="secondary"
-                  className="rounded-full h-10 px-5 bg-white/95 text-[hsl(215_45%_22%)] border-0 shadow-md hover:bg-white gap-2"
-                  onClick={() => toast({ title: "My interests", description: "Pick topics you care about (demo)." })}
-                >
-                  <Heart className="h-4 w-4 text-rose-500" />
-                  My interests
-                </Button>
-                <Button
-                  type="button"
-                  variant="secondary"
-                  className="rounded-full h-10 px-5 bg-white/95 text-[hsl(215_45%_22%)] border-0 shadow-md hover:bg-white gap-2"
-                  onClick={() => navigate("/calendar")}
-                >
-                  <Calendar className="h-4 w-4 text-[hsl(174_55%_36%)]" />
-                  My calendar
-                </Button>
-              </div>
-            </div>
-            <div className="grid grid-cols-3 gap-3 shrink-0">
-              <div className="rounded-xl bg-black/20 border border-white/15 backdrop-blur-sm p-4 text-center">
-                <p className="text-2xl font-bold">{upcomingCount}</p>
-                <p className="text-xs opacity-85 mt-1">Upcoming</p>
-              </div>
-              <div className="rounded-xl bg-black/20 border border-white/15 backdrop-blur-sm p-4 text-center">
-                <p className="text-2xl font-bold">{registeredCount}</p>
-                <p className="text-xs opacity-85 mt-1">Registered</p>
-              </div>
-              <div className="rounded-xl bg-black/20 border border-white/15 backdrop-blur-sm p-4 text-center">
-                <p className="text-2xl font-bold">{liveEvents.length}</p>
-                <p className="text-xs opacity-85 mt-1">Live now</p>
-              </div>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-        <Card className="shadow-card border-border/60 hover:shadow-md transition-shadow cursor-default">
-          <CardContent className="p-4 flex items-center gap-3">
-            <div className="h-10 w-10 rounded-lg bg-[hsl(174_55%_42%)]/15 flex items-center justify-center shrink-0">
-              <Calendar className="h-5 w-5 text-[hsl(174_55%_36%)]" />
-            </div>
-            <div>
-              <p className="text-2xl font-bold">{upcomingCount}</p>
-              <p className="text-xs text-muted-foreground">Upcoming events</p>
-            </div>
-          </CardContent>
-        </Card>
-        <Card className="shadow-card border-border/60 hover:shadow-md transition-shadow cursor-default">
-          <CardContent className="p-4 flex items-center gap-3">
-            <div className="h-10 w-10 rounded-lg bg-red-500/15 flex items-center justify-center shrink-0">
-              <Zap className="h-5 w-5 text-red-600 dark:text-red-400" />
-            </div>
-            <div>
-              <p className="text-2xl font-bold">{liveEvents.length}</p>
-              <p className="text-xs text-muted-foreground">Live now</p>
-            </div>
-          </CardContent>
-        </Card>
-        <Card className="shadow-card border-border/60 hover:shadow-md transition-shadow cursor-default">
-          <CardContent className="p-4 flex items-center gap-3">
-            <div className="h-10 w-10 rounded-lg bg-amber-500/20 flex items-center justify-center shrink-0">
-              <Star className="h-5 w-5 text-amber-600 dark:text-amber-500" />
-            </div>
-            <div>
-              <p className="text-2xl font-bold">{registeredCount}</p>
-              <p className="text-xs text-muted-foreground">Registered</p>
-            </div>
-          </CardContent>
-        </Card>
-        <Card className="shadow-card border-border/60 hover:shadow-md transition-shadow cursor-default">
-          <CardContent className="p-4 flex items-center gap-3">
-            <div className="h-10 w-10 rounded-lg bg-blue-950/15 dark:bg-blue-400/15 flex items-center justify-center shrink-0">
-              <Users className="h-5 w-5 text-blue-800 dark:text-blue-300" />
-            </div>
-            <div>
-              <p className="text-2xl font-bold">2300+</p>
-              <p className="text-xs text-muted-foreground">Community</p>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {live && (
-        <div
-          className={cn(
-            "rounded-xl border border-rose-200/90 dark:border-rose-900/40 bg-rose-50/95 dark:bg-rose-950/25",
-            "shadow-card overflow-hidden border-l-4 border-l-destructive pl-1",
-          )}
-        >
-          <div className="p-4 sm:p-5 flex flex-col lg:flex-row lg:items-center gap-4 lg:gap-6">
-            <div className="flex gap-4 min-w-0 flex-1">
-              <div className="shrink-0 flex flex-col items-center gap-2 pt-0.5">
-                <div
-                  className="h-11 w-11 rounded-full bg-destructive/15 flex items-center justify-center ring-2 ring-destructive/25"
-                  aria-hidden
-                >
-                  <Play className="h-5 w-5 text-destructive fill-destructive translate-x-0.5" />
-                </div>
-              </div>
-              <div className="min-w-0 space-y-2 flex-1">
-                <div className="flex flex-wrap items-center gap-2">
-                  <Badge className="bg-destructive text-destructive-foreground gap-1.5 font-semibold">
-                    <span className="relative flex h-2 w-2">
-                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary-foreground opacity-75" />
-                      <span className="relative inline-flex rounded-full h-2 w-2 bg-primary-foreground" />
-                    </span>
-                    LIVE
-                  </Badge>
-                  <span className="text-sm font-medium text-destructive">{watchingCount} watching</span>
-                </div>
-                <h2 className="text-xl font-bold text-foreground leading-tight">{live.title}</h2>
-                <p className="text-sm text-muted-foreground">
-                  by {live.speaker.name} · {live.location}
-                </p>
-              </div>
-            </div>
-            <Button
-              type="button"
-              className="gap-2 shrink-0 w-full lg:w-auto h-11 rounded-lg bg-[hsl(174_62%_28%)] hover:bg-[hsl(174_62%_24%)] text-primary-foreground shadow-md"
-              onClick={onJoinLive}
-            >
-              Join now
-              <ArrowRight className="h-4 w-4" />
-            </Button>
-          </div>
-        </div>
-      )}
-
+    <div className="space-y-8 w-full">
       <Tabs value={audienceTab} onValueChange={setAudienceTab} className="space-y-4">
         <TabsList className="flex w-full max-w-2xl h-auto p-0 bg-transparent rounded-none border-b border-border gap-0 justify-start">
           <TabsTrigger
