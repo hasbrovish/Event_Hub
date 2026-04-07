@@ -12,6 +12,7 @@ import Preferences from "./pages/Preferences";
 import Notifications from "./pages/Notifications";
 import ManageEvents from "./pages/ManageEvents";
 import MySessions from "./pages/MySessions";
+import MyProposals from "./pages/MyProposals";
 import Campaigns from "./pages/Campaigns";
 import AdminPanel from "./pages/AdminPanel";
 import NotFound from "./pages/NotFound";
@@ -36,6 +37,7 @@ const App = () => (
             <Route path="/notifications" element={<Notifications />} />
             <Route path="/manage-events" element={<ManageEvents />} />
             <Route path="/my-sessions" element={<MySessions />} />
+            <Route path="/my-proposals" element={<MyProposals />} />
             <Route path="/campaigns" element={<Campaigns />} />
             <Route path="/admin/access" element={<AdminPanel />} />
             <Route path="/admin/logs" element={<AdminPanel />} />

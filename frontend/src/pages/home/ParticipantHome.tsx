@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { mockEvents } from "@/data/mockEvents";
+import { DEMO_USER } from "@/data/participantProfile";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
@@ -21,8 +22,6 @@ import {
   Star,
   Zap,
 } from "lucide-react";
-
-const MY_SESSION_IDS = new Set(["1", "7"]);
 
 const proposals = [
   { id: "p1", title: "GraphQL vs REST", status: "approved" as const, votes: 12 },
@@ -53,7 +52,7 @@ export default function ParticipantHome() {
   const upcomingCount = mockEvents.filter((e) => e.status === "upcoming").length;
   const registeredCount = Object.values(registered).filter(Boolean).length;
   const live = liveEvents[0];
-  const mySessions = mockEvents.filter((e) => MY_SESSION_IDS.has(e.id));
+  const mySessions = mockEvents.filter((e) => DEMO_USER.electedSpeakerEventIds.has(e.id));
 
   const counts = useMemo(() => {
     const pending = proposals.filter((p) => p.status === "pending").length;

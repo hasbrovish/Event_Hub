@@ -10,6 +10,7 @@ import {
   BarChart3,
   Bell,
   ChevronDown,
+  ClipboardList,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { NavLink } from "@/components/NavLink";
@@ -50,6 +51,7 @@ const participantItems = [
   { title: "Discover Events", url: "/", icon: Home },
   { title: "Propose Event", url: "/create-event", icon: Plus },
   { title: "My Sessions", url: "/my-sessions", icon: Mic },
+  { title: "My Proposals", url: "/my-proposals", icon: ClipboardList },
   { title: "My Calendar", url: "/calendar", icon: Calendar },
   { title: "Notifications", url: "/notifications", icon: Bell },
   { title: "Preferences", url: "/preferences", icon: Settings },
@@ -66,7 +68,6 @@ const organizerItems = [
 const adminItems = [
   { title: "Dashboard", url: "/", icon: Home },
   { title: "My Calendar", url: "/calendar", icon: Calendar },
-  { title: "Notifications", url: "/notifications", icon: Bell },
   { title: "Access Matrix", url: "/admin/access", icon: Shield },
   { title: "All Events", url: "/manage-events", icon: List },
   { title: "System Logs", url: "/admin/logs", icon: BarChart3 },

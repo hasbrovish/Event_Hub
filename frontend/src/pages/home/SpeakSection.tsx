@@ -12,15 +12,13 @@ import {
   YAxis,
 } from "recharts";
 import { mockEvents } from "@/data/mockEvents";
+import { DEMO_USER } from "@/data/participantProfile";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useToast } from "@/hooks/use-toast";
 import { ArrowRight, MessageCircle, Mic, Plus, Star, Users } from "lucide-react";
-
-const MY_SESSION_IDS = new Set(["1", "7"]);
 
 const proposals = [
   { id: "p1", title: "GraphQL vs REST", status: "approved" as const, votes: 12 },
@@ -56,9 +54,8 @@ type ProposalStatus = (typeof proposals)[number]["status"];
 
 export function SpeakSection() {
   const navigate = useNavigate();
-  const { toast } = useToast();
   const [proposalTab, setProposalTab] = useState<"all" | ProposalStatus>("all");
-  const mySessions = mockEvents.filter((e) => MY_SESSION_IDS.has(e.id));
+  const mySessions = mockEvents.filter((e) => DEMO_USER.electedSpeakerEventIds.has(e.id));
 
   const counts = useMemo(() => {
     const all = proposals.length;
@@ -179,13 +176,9 @@ export function SpeakSection() {
                 </TabsContent>
               ))}
             </Tabs>
-            <Button
-              type="button"
-              variant="secondary"
-              className="w-full"
-              onClick={() => toast({ title: "Proposals", description: "Opening full proposal queue (demo)." })}
-            >
+            <Button type="button" variant="secondary" className="w-full gap-2" onClick={() => navigate("/my-proposals")}>
               View all proposals
+              <ArrowRight className="h-4 w-4" />
             </Button>
           </CardContent>
         </Card>
