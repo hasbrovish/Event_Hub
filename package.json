@@ -2,6 +2,8 @@
   "name": "event-hub",
   "private": true,
   "version": "0.0.0",
+  "description": "Event Hub desktop shell (Electron)",
+  "author": "Event Hub",
   "main": "electron/main.cjs",
   "workspaces": [
     "frontend"
@@ -10,12 +12,56 @@
     "dev": "concurrently -k \"npm run dev -w frontend\" \"wait-on tcp:127.0.0.1:8080 && cross-env ELECTRON_USE_DEV_SERVER=1 electron .\"",
     "build:desktop": "npm run build:electron -w frontend",
     "start:desktop": "electron .",
+    "dist:win": "npm run build:desktop && electron-builder --win --x64",
+    "dist:mac": "npm run build:desktop && electron-builder --mac",
     "postinstall": "node scripts/ensure-electron.cjs"
+  },
+  "build": {
+    "appId": "com.eventhub.desktop",
+    "productName": "Event Hub",
+    "directories": {
+      "output": "dist-electron"
+    },
+    "publish": null,
+    "files": [
+      "electron/**/*.cjs",
+      "frontend/dist/**/*",
+      "package.json"
+    ],
+    "asar": true,
+    "win": {
+      "target": [
+        {
+          "target": "portable",
+          "arch": [
+            "x64"
+          ]
+        },
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
+      ]
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true
+    },
+    "mac": {
+      "target": [
+        "dmg",
+        "zip"
+      ],
+      "category": "public.app-category.productivity"
+    }
   },
   "devDependencies": {
     "concurrently": "^9.1.2",
     "cross-env": "^7.0.3",
     "electron": "^33.4.1",
+    "electron-builder": "^25.1.8",
     "wait-on": "^8.0.1"
   }
 }

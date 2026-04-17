@@ -1,15 +1,16 @@
-import { useState } from "react";
-import { mockEvents } from "@/data/mockEvents";
+import { useMemo, useState } from "react";
+import { Link } from "react-router-dom";
 import { EventCard } from "@/components/EventCard";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Calendar, LayoutGrid, List, TrendingUp, Users, Zap } from "lucide-react";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Calendar, LayoutGrid, List, Plus, TrendingUp, Users, Zap } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
+import { cn } from "@/lib/utils";
+import { useEvents } from "@/hooks/useEvents";
+import { mapListItemToEventData } from "@/lib/eventMap";
 
 const categories = ["all", "tech", "domain", "health", "fun", "product"] as const;
 const categoryLabels: Record<string, string> = {
-  all: "All Events",
+  all: "All",
   tech: "Technology",
   domain: "Domain",
   health: "Health",
@@ -21,125 +22,177 @@ export default function Dashboard() {
   const [activeCategory, setActiveCategory] = useState<string>("all");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
 
-  const filteredEvents = activeCategory === "all"
-    ? mockEvents
-    : mockEvents.filter((e) => e.category === activeCategory);
+  const { data, isPending, isError, refetch } = useEvents({
+    category: activeCategory === "all" ? undefined : activeCategory,
+    page: 1,
+    page_size: 100,
+  });
 
-  const liveEvents = mockEvents.filter((e) => e.status === "live");
-  const upcomingCount = mockEvents.filter((e) => e.status === "upcoming").length;
-  const registeredCount = mockEvents.filter((e) => e.isRegistered).length;
+  const events = useMemo(() => (data?.items ?? []).map(mapListItemToEventData), [data]);
+
+  const liveEvents = events.filter((e) => e.status === "live");
+  const upcomingCount = events.filter((e) => e.status === "upcoming").length;
+  const registeredCount = events.filter((e) => e.isRegistered).length;
 
   return (
-    <div className="p-6 max-w-7xl mx-auto space-y-6 animate-fade-in">
-      {/* Stats Row */}
+    <div className="p-5 md:p-6 max-w-7xl mx-auto space-y-6 animate-fade-in">
+      {isError && (
+        <div className="rounded-xl border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm flex flex-wrap items-center justify-between gap-2">
+          <span>Could not load events from the API. Is the backend running and the database migrated?</span>
+          <Button size="sm" variant="outline" onClick={() => void refetch()}>
+            Retry
+          </Button>
+        </div>
+      )}
+
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <Card className="shadow-card border-border/60">
+        <Card className="shadow-card border-border/50 rounded-2xl overflow-hidden">
           <CardContent className="p-4 flex items-center gap-3">
-            <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
+            <div className="h-11 w-11 rounded-xl bg-primary/10 flex items-center justify-center">
               <Calendar className="h-5 w-5 text-primary" />
             </div>
             <div>
-              <p className="text-2xl font-bold">{upcomingCount}</p>
-              <p className="text-xs text-muted-foreground">Upcoming Events</p>
+              <p className="text-2xl font-bold tracking-tight text-foreground">{upcomingCount}</p>
+              <p className="text-xs text-muted-foreground font-medium">Upcoming events</p>
             </div>
           </CardContent>
         </Card>
-        <Card className="shadow-card border-border/60">
+        <Card className="shadow-card border-border/50 rounded-2xl overflow-hidden">
           <CardContent className="p-4 flex items-center gap-3">
-            <div className="h-10 w-10 rounded-lg bg-destructive/10 flex items-center justify-center">
-              <Zap className="h-5 w-5 text-destructive" />
+            <div className="h-11 w-11 rounded-xl bg-orange-500/12 flex items-center justify-center">
+              <Zap className="h-5 w-5 text-orange-600" />
             </div>
             <div>
-              <p className="text-2xl font-bold">{liveEvents.length}</p>
-              <p className="text-xs text-muted-foreground">Live Now</p>
+              <p className="text-2xl font-bold tracking-tight text-foreground">{liveEvents.length}</p>
+              <p className="text-xs text-muted-foreground font-medium">Live now</p>
             </div>
           </CardContent>
         </Card>
-        <Card className="shadow-card border-border/60">
+        <Card className="shadow-card border-border/50 rounded-2xl overflow-hidden">
           <CardContent className="p-4 flex items-center gap-3">
-            <div className="h-10 w-10 rounded-lg bg-accent/20 flex items-center justify-center">
-              <Users className="h-5 w-5 text-accent-foreground" />
+            <div className="h-11 w-11 rounded-xl bg-infy-lavender flex items-center justify-center border border-infy-purple/10">
+              <Users className="h-5 w-5 text-infy-purple" />
             </div>
             <div>
-              <p className="text-2xl font-bold">{registeredCount}</p>
-              <p className="text-xs text-muted-foreground">My Registrations</p>
+              <p className="text-2xl font-bold tracking-tight text-foreground">{registeredCount}</p>
+              <p className="text-xs text-muted-foreground font-medium">My registrations</p>
             </div>
           </CardContent>
         </Card>
       </div>
 
-      {/* Live Banner */}
       {liveEvents.length > 0 && (
-        <Card className="gradient-hero text-primary-foreground overflow-hidden shadow-elevated">
-          <CardContent className="p-5 flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="h-3 w-3 rounded-full bg-primary-foreground animate-pulse" />
-              <div>
-                <p className="font-semibold">{liveEvents[0].title}</p>
-                <p className="text-sm opacity-80">Happening now · {liveEvents[0].attendees} watching</p>
+        <Card className="gradient-hero text-white overflow-hidden shadow-elevated rounded-2xl border-0">
+          <CardContent className="p-5 md:p-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div className="flex items-center gap-3 min-w-0">
+              <div className="h-2.5 w-2.5 shrink-0 rounded-full bg-infy-gold shadow-[0_0_0_3px_rgba(255,255,255,0.25)] animate-pulse" />
+              <div className="min-w-0">
+                <p className="font-semibold truncate">{liveEvents[0].title}</p>
+                <p className="text-sm text-white/85">
+                  Happening now · {liveEvents[0].attendees} attending
+                </p>
               </div>
             </div>
-            <Button variant="secondary" size="sm" className="font-medium">
-              Join Now
+            <Button
+              size="sm"
+              className="shrink-0 rounded-full px-5 bg-infy-gold text-accent-foreground hover:bg-infy-gold/90 font-semibold shadow-md border-0"
+              asChild
+            >
+              <Link to={`/event/${liveEvents[0].id}`}>Join now</Link>
             </Button>
           </CardContent>
         </Card>
       )}
 
-      {/* Filters & View */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-        <div className="flex flex-wrap gap-2">
-          {categories.map((cat) => (
-            <Badge
-              key={cat}
-              variant={activeCategory === cat ? "default" : "outline"}
-              className="cursor-pointer px-3 py-1 transition-colors hover:bg-primary hover:text-primary-foreground"
-              onClick={() => setActiveCategory(cat)}
-            >
-              {categoryLabels[cat]}
-            </Badge>
-          ))}
-        </div>
-        <div className="flex items-center gap-1">
-          <Button
-            variant={viewMode === "grid" ? "default" : "ghost"}
-            size="icon"
-            className="h-8 w-8"
-            onClick={() => setViewMode("grid")}
-          >
-            <LayoutGrid className="h-4 w-4" />
-          </Button>
-          <Button
-            variant={viewMode === "list" ? "default" : "ghost"}
-            size="icon"
-            className="h-8 w-8"
-            onClick={() => setViewMode("list")}
-          >
-            <List className="h-4 w-4" />
-          </Button>
-        </div>
-      </div>
-
-      {/* Event Grid */}
-      <div className={
-        viewMode === "grid"
-          ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
-          : "flex flex-col gap-3"
-      }>
-        {filteredEvents.map((event, idx) => (
-          <div key={event.id} style={{ animationDelay: `${idx * 50}ms` }} className="animate-fade-in">
-            <EventCard event={event} />
+      <section className="rounded-2xl bg-infy-lavender/90 border border-border/40 p-5 md:p-6 shadow-card">
+        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 mb-5">
+          <div>
+            <h2 className="text-lg font-bold text-foreground tracking-tight">Events to participate</h2>
+            <p className="text-sm text-muted-foreground mt-0.5">
+              Data from PostgreSQL via <code className="text-xs">GET /events</code>.
+            </p>
           </div>
-        ))}
-      </div>
-
-      {filteredEvents.length === 0 && (
-        <div className="text-center py-16 text-muted-foreground">
-          <TrendingUp className="h-12 w-12 mx-auto mb-3 opacity-30" />
-          <p className="font-medium">No events in this category</p>
-          <p className="text-sm">Check back later or explore other categories</p>
+          <Link
+            to="/create-event"
+            className="inline-flex items-center gap-1.5 text-sm font-semibold text-primary hover:text-primary/80 transition-colors shrink-0"
+          >
+            <Plus className="h-4 w-4" />
+            Propose an event
+          </Link>
         </div>
-      )}
+
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-5">
+          <div className="flex flex-wrap gap-2">
+            {categories.map((cat) => (
+              <button
+                key={cat}
+                type="button"
+                onClick={() => setActiveCategory(cat)}
+                className={cn(
+                  "rounded-full px-4 py-1.5 text-sm font-medium transition-all border",
+                  activeCategory === cat
+                    ? "bg-secondary border-transparent text-foreground shadow-sm"
+                    : "bg-card/90 border-border/80 text-muted-foreground hover:bg-card hover:text-foreground",
+                )}
+              >
+                {categoryLabels[cat]}
+              </button>
+            ))}
+          </div>
+          <div className="flex items-center gap-1 rounded-full bg-card/80 border border-border/60 p-1 shadow-sm">
+            <Button
+              variant={viewMode === "grid" ? "secondary" : "ghost"}
+              size="icon"
+              className={cn("h-8 w-8 rounded-full", viewMode === "grid" && "bg-background shadow-sm")}
+              onClick={() => setViewMode("grid")}
+            >
+              <LayoutGrid className="h-4 w-4" />
+            </Button>
+            <Button
+              variant={viewMode === "list" ? "secondary" : "ghost"}
+              size="icon"
+              className={cn("h-8 w-8 rounded-full", viewMode === "list" && "bg-background shadow-sm")}
+              onClick={() => setViewMode("list")}
+            >
+              <List className="h-4 w-4" />
+            </Button>
+          </div>
+        </div>
+
+        {isPending ? (
+          <p className="text-sm text-muted-foreground py-8 text-center">Loading events…</p>
+        ) : (
+          <div
+            className={
+              viewMode === "grid"
+                ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
+                : "flex flex-col gap-3"
+            }
+          >
+            {events.map((event, idx) => (
+              <div key={event.id} style={{ animationDelay: `${idx * 50}ms` }} className="animate-fade-in">
+                <EventCard event={event} />
+              </div>
+            ))}
+          </div>
+        )}
+
+        {!isPending && events.length === 0 && (
+          <div className="text-center py-14 text-muted-foreground rounded-xl bg-card/50 border border-dashed border-border/60 mt-2">
+            <TrendingUp className="h-12 w-12 mx-auto mb-3 opacity-25 text-infy-purple" />
+            <p className="font-semibold text-foreground">No events yet</p>
+            <p className="text-sm mt-1 max-w-md mx-auto">
+              Run{" "}
+              <code className="text-xs bg-muted px-1 rounded">python -m scripts.seed_demo_events</code> from
+              the backend folder (after migrations), or create an event.
+            </p>
+          </div>
+        )}
+      </section>
+
+      <p className="text-center text-xs text-muted-foreground pb-2">
+        © {new Date().getFullYear()} Event Hub · Internal use
+      </p>
     </div>
   );
 }

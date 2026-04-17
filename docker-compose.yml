@@ -1,0 +1,34 @@
+# Local PostgreSQL for Event Hub (Phase 1+). Aligns with MASTER_IMPLEMENTATION_PLAN + db_design.md
+#
+# Persistence:
+#   - Data is stored in the named volume `eventhub_pg_data` (survives container recreate and `docker compose down`).
+#   - To wipe ALL local DB data: `docker compose down -v` (removes the volume).
+#
+# Same project on another machine:
+#   - Copy repo, optional `cp docker-compose.env.example .env`, then `docker compose up -d`.
+#   - Each machine gets its own volume unless you copy/restore backups.
+#
+# Stable volume name across folders (optional): export COMPOSE_PROJECT_NAME=eventhub before compose commands.
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: eventhub-pg
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: eventhub
+      POSTGRES_PASSWORD: eventhub
+      POSTGRES_DB: eventhub
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - eventhub_pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U eventhub -d eventhub"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+volumes:
+  eventhub_pg_data:
